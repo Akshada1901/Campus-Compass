@@ -6,143 +6,683 @@
 <title>Campus Compass</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg: #0d0f14; --surface: #161920; --surface2: #1e2230; --border: #2a2f42;
-    --accent: #f0a500; --accent2: #e05c2a; --text: #e8eaf2; --muted: #7a8099;
-    --success: #2ecc71; --danger: #e74c3c; --warning: #f39c12;
-  }
-  * { margin:0; padding:0; box-sizing:border-box; }
-  body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
+:root {
+  --bg:#0d0f14;--surface:#161920;--surface2:#1e2230;--border:#2a2f42;
+  --accent:#f0a500;--accent2:#e05c2a;--text:#e8eaf2;--muted:#7a8099;
+  --success:#2ecc71;--danger:#e74c3c;--warning:#f39c12;
+  --teal:#00c9b1;--indigo:#5b4fff;--rose:#ff4f7b;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden;}
 
-  /* NAV */
-  nav { display:none; position:fixed; top:0; left:0; right:0; z-index:100; background:rgba(13,15,20,0.92); backdrop-filter:blur(12px); border-bottom:1px solid var(--border); padding:0 2rem; height:60px; align-items:center; justify-content:space-between; }
-  nav.visible { display:flex; }
-  .nav-logo { font-family:'Syne',sans-serif; font-weight:800; font-size:1.1rem; color:var(--accent); }
-  .nav-links { display:flex; gap:0.25rem; }
-  .nav-links button { background:none; border:none; color:var(--muted); cursor:pointer; font-family:'DM Sans',sans-serif; font-size:0.85rem; padding:0.4rem 0.9rem; border-radius:6px; transition:all 0.2s; font-weight:500; }
-  .nav-links button.active, .nav-links button:hover { color:var(--text); background:var(--surface2); }
-  .nav-links button.active { color:var(--accent); }
-  .nav-right { display:flex; align-items:center; gap:1rem; }
-  .nav-user { font-size:0.85rem; color:var(--muted); }
-  .btn-logout { background:var(--surface2); border:1px solid var(--border); color:var(--text); padding:0.35rem 0.9rem; border-radius:6px; cursor:pointer; font-size:0.82rem; font-family:'DM Sans',sans-serif; transition:all 0.2s; }
-  .btn-logout:hover { border-color:var(--danger); color:var(--danger); }
+#landing-wrapper{
+  display:block;position:fixed;inset:0;overflow-y:auto;z-index:50;
+  background:var(--bg);transition:opacity 0.6s ease,transform 0.6s ease;
+}
+#landing-wrapper.hide{opacity:0;pointer-events:none;transform:scale(1.04);}
 
-  /* PAGES */
-  .page { display:none; min-height:100vh; }
-  .page.active { display:block; }
+.scene-bg{
+  position:fixed;inset:0;z-index:0;overflow:hidden;
+  background:
+    radial-gradient(ellipse 80% 70% at 65% 35%, #003d35 0%, #001e2a 45%, transparent 75%),
+    radial-gradient(ellipse 50% 50% at 20% 70%, #001525 0%, transparent 55%),
+    #050c0e;
+}
+.fog{
+  position:absolute;bottom:0;left:-50%;width:200%;
+  border-radius:50%;
+  opacity:0.07;
+  animation:fogDrift var(--spd,40s) ease-in-out infinite alternate;
+}
+.fog1{height:180px;background:radial-gradient(ellipse,#5b4fff,transparent 70%);bottom:5%;--spd:35s;}
+.fog2{height:120px;background:radial-gradient(ellipse,#00c9b1,transparent 70%);bottom:0;--spd:50s;animation-delay:-15s;}
+.fog3{height:100px;background:radial-gradient(ellipse,#f0a500,transparent 70%);bottom:8%;--spd:28s;animation-delay:-8s;opacity:0.05;}
+@keyframes fogDrift{from{transform:translateX(-8%)}to{transform:translateX(8%)}}
 
-  /* LOGIN */
-  #page-login { display:flex; align-items:center; justify-content:center; min-height:100vh; background:radial-gradient(ellipse at 20% 50%, rgba(240,165,0,0.07) 0%, transparent 60%), radial-gradient(ellipse at 80% 20%, rgba(224,92,42,0.07) 0%, transparent 50%), var(--bg); }
-  #page-login.active { display:flex; }
-  .login-card { width:420px; background:var(--surface); border:1px solid var(--border); border-radius:20px; padding:2.5rem; box-shadow:0 40px 80px rgba(0,0,0,0.5); }
-  .login-header { text-align:center; margin-bottom:2rem; }
-  .login-icon { width:56px; height:56px; border-radius:14px; background:linear-gradient(135deg,var(--accent),var(--accent2)); display:flex; align-items:center; justify-content:center; font-size:1.5rem; margin:0 auto 1rem; }
-  .login-header h1 { font-family:'Syne',sans-serif; font-size:1.5rem; font-weight:800; margin-bottom:0.3rem; }
-  .login-header p { color:var(--muted); font-size:0.88rem; }
-  .login-tabs { display:flex; gap:0.5rem; margin-bottom:1.2rem; }
-  .login-tab { flex:1; padding:0.5rem; border:1px solid var(--border); border-radius:8px; background:none; color:var(--muted); cursor:pointer; font-family:'DM Sans',sans-serif; font-size:0.85rem; font-weight:500; transition:all 0.2s; }
-  .login-tab.active { background:var(--surface2); border-color:var(--accent); color:var(--accent); }
-  .register-fields { display:none; }
-  .register-fields.show { display:block; }
+.lamp-glow{
+  position:absolute;
+  border-radius:50%;
+  background:radial-gradient(circle,rgba(240,165,0,0.4),transparent 70%);
+  pointer-events:none;
+  animation:lampFlicker 3s ease-in-out infinite;
+}
+@keyframes lampFlicker{0%,100%{opacity:0.9}50%{opacity:0.65}75%{opacity:1}}
 
-  /* FORMS */
-  .form-group { margin-bottom:1rem; }
-  .form-group label { display:block; font-size:0.78rem; font-weight:500; color:var(--muted); margin-bottom:0.4rem; text-transform:uppercase; letter-spacing:0.5px; }
-  .form-group input, .form-group select, .form-group textarea { width:100%; background:var(--surface2); border:1px solid var(--border); border-radius:10px; padding:0.7rem 1rem; color:var(--text); font-family:'DM Sans',sans-serif; font-size:0.9rem; transition:border-color 0.2s; outline:none; }
-  .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color:var(--accent); }
-  .form-group select { cursor:pointer; }
-  .form-group textarea { resize:vertical; min-height:80px; }
-  .btn-primary { width:100%; padding:0.8rem; border:none; border-radius:10px; background:linear-gradient(135deg,var(--accent),var(--accent2)); color:#fff; font-family:'Syne',sans-serif; font-weight:700; font-size:0.95rem; cursor:pointer; transition:opacity 0.2s,transform 0.1s; }
-  .btn-primary:hover { opacity:0.9; }
-  .btn-primary:active { transform:scale(0.98); }
-  .btn-primary:disabled { opacity:0.5; cursor:not-allowed; }
-  .login-switch { text-align:center; margin-top:1rem; font-size:0.82rem; color:var(--muted); }
-  .login-switch span { color:var(--accent); cursor:pointer; font-weight:500; }
-  .login-switch span:hover { text-decoration:underline; }
+.land-nav{
+  position:sticky;top:0;z-index:200;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 3rem;height:64px;
+  background:rgba(8,11,18,0.85);
+  backdrop-filter:blur(20px);
+  border-bottom:1px solid rgba(91,79,255,0.15);
+}
+.land-nav-logo{
+  font-family:'Syne',sans-serif;font-weight:800;font-size:1.15rem;
+  color:var(--accent);display:flex;align-items:center;gap:0.5rem;
+}
+.land-nav-logo span{color:var(--text);}
+.land-nav-links{display:flex;gap:0.25rem;}
+.land-nav-links a{
+  color:var(--muted);text-decoration:none;font-size:0.88rem;
+  font-weight:500;padding:0.4rem 1rem;border-radius:8px;transition:all 0.2s;
+}
+.land-nav-links a:hover{color:var(--text);background:rgba(255,255,255,0.06);}
+.land-nav-cta{
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  color:#fff!important;border-radius:8px;font-weight:600!important;
+}
+.land-nav-cta:hover{opacity:0.88;transform:translateY(-1px);}
 
-  /* INNER PAGES */
-  .page-inner { padding-top:80px; padding-bottom:3rem; max-width:1100px; margin:0 auto; padding-left:1.5rem; padding-right:1.5rem; }
-  .page-title { font-family:'Syne',sans-serif; font-size:1.7rem; font-weight:800; margin-bottom:0.3rem; }
-  .page-sub { color:var(--muted); font-size:0.9rem; margin-bottom:2rem; }
-  .section-card { background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:1.8rem; margin-bottom:2rem; }
-  .section-card h2 { font-family:'Syne',sans-serif; font-size:1.1rem; font-weight:700; margin-bottom:1.2rem; display:flex; align-items:center; gap:0.5rem; }
-  .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+/* ══ HERO ══ */
+.hero-section{
+  position:relative;min-height:100vh;
+  display:flex;align-items:center;justify-content:center;
+  overflow:hidden;
+  background:
+    radial-gradient(ellipse 70% 80% at 70% 40%, #003d3a 0%, #001f2e 40%, transparent 70%),
+    radial-gradient(ellipse 50% 60% at 30% 60%, #001a2a 0%, transparent 60%),
+    #060c10;
+}
+.hero-layout{
+  position:relative;z-index:10;
+  display:grid;
+  grid-template-columns:1fr 520px;
+  align-items:center;
+  max-width:1400px;width:100%;padding:0;gap:0;
+  min-height:100vh;
+}
+.hero-text{
+  animation:heroIn 1s cubic-bezier(0.16,1,0.3,1) both;
+  padding:6rem 3rem 6rem 5rem;
+  position:relative;z-index:2;
+}
+@keyframes heroIn{from{opacity:0;transform:translateX(-40px)}to{opacity:1;transform:translateX(0)}}
 
-  /* UPLOAD */
-  .upload-area { border:2px dashed var(--border); border-radius:12px; padding:2rem; text-align:center; cursor:pointer; transition:all 0.2s; position:relative; }
-  .upload-area:hover { border-color:var(--accent); background:rgba(240,165,0,0.03); }
-  .upload-area input[type="file"] { position:absolute; inset:0; opacity:0; cursor:pointer; }
-  .upload-area .upload-icon { font-size:2rem; margin-bottom:0.5rem; }
-  .upload-area p { color:var(--muted); font-size:0.85rem; }
-  .upload-preview { margin-top:1rem; }
-  .upload-preview img { max-height:120px; border-radius:8px; object-fit:cover; }
+.hero-title{
+  font-family:'Syne',sans-serif;
+  font-size:clamp(3.5rem,7vw,6rem);
+  font-weight:800;line-height:0.95;
+  letter-spacing:-2px;margin-bottom:1.5rem;
+}
+.hero-title .t1{display:block;color:#ffffff;}
+.hero-title .t2{
+  display:block;
+  background:linear-gradient(135deg,var(--accent) 0%,var(--accent2) 50%,var(--rose) 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.hero-sub{
+  font-size:1rem;color:rgba(200,220,215,0.75);max-width:480px;
+  line-height:1.8;margin-bottom:2.5rem;
+}
+.hero-btns{display:flex;gap:1rem;flex-wrap:wrap;}
+.btn-hp{
+  padding:0.9rem 2.2rem;background:linear-gradient(135deg,var(--accent),var(--accent2));
+  color:#fff;border:none;border-radius:10px;font-family:'Syne',sans-serif;
+  font-weight:700;font-size:0.95rem;cursor:pointer;transition:all 0.25s;
+  box-shadow:0 6px 28px rgba(240,165,0,0.3);
+}
+.btn-hp:hover{transform:translateY(-2px);box-shadow:0 10px 40px rgba(240,165,0,0.45);}
+.btn-hs{
+  padding:0.9rem 2.2rem;background:rgba(255,255,255,0.06);
+  color:var(--text);border:1px solid rgba(255,255,255,0.18);
+  border-radius:10px;font-family:'Syne',sans-serif;font-weight:600;
+  font-size:0.95rem;cursor:pointer;transition:all 0.25s;
+}
+.btn-hs:hover{border-color:rgba(0,200,180,0.5);color:#00c9b1;background:rgba(0,200,180,0.06);}
 
-  /* ITEMS */
-  .items-grid { display:flex; flex-direction:column; gap:1rem; }
-  .item-card { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:1.2rem 1.5rem; display:grid; grid-template-columns:auto 1fr auto; gap:1rem; align-items:center; transition:border-color 0.2s; }
-  .item-card:hover { border-color:var(--accent); }
-  .item-thumb { width:56px; height:56px; border-radius:10px; background:var(--surface2); display:flex; align-items:center; justify-content:center; font-size:1.5rem; overflow:hidden; flex-shrink:0; }
-  .item-thumb img { width:100%; height:100%; object-fit:cover; }
-  .item-info h3 { font-family:'Syne',sans-serif; font-weight:700; font-size:0.95rem; margin-bottom:0.2rem; }
-  .item-info p { color:var(--muted); font-size:0.82rem; margin-bottom:0.4rem; }
-  .item-meta { display:flex; gap:0.5rem; flex-wrap:wrap; }
-  .tag { font-size:0.75rem; padding:0.2rem 0.6rem; border-radius:20px; background:var(--surface2); color:var(--muted); border:1px solid var(--border); }
-  .tag.location { color:#7eb8f7; border-color:rgba(126,184,247,0.3); background:rgba(126,184,247,0.08); }
-  .item-contact { text-align:right; font-size:0.82rem; color:var(--muted); min-width:160px; }
-  .item-contact strong { display:block; color:var(--text); font-size:0.88rem; margin-bottom:0.2rem; }
-  .contact-link { color:var(--accent); text-decoration:none; font-size:0.8rem; }
+/* ══ HERO VISUAL PANEL ══ */
+.hero-visual{
+  width:520px;height:100vh;
+  position:relative;
+  display:flex;align-items:center;justify-content:center;
+  overflow:hidden;
+  animation:heroIn 1.2s cubic-bezier(0.16,1,0.3,1) 0.15s both;
+}
 
-  /* BADGES */
-  .badge { display:inline-block; font-size:0.72rem; font-weight:600; padding:0.25rem 0.7rem; border-radius:20px; text-transform:uppercase; letter-spacing:0.5px; }
-  .badge-pending { background:rgba(243,156,18,0.15); color:var(--warning); }
-  .badge-found   { background:rgba(46,204,113,0.15); color:var(--success); }
-  .badge-collected { background:rgba(127,140,141,0.15); color:#95a5a6; }
-  .badge-new     { background:rgba(240,165,0,0.15); color:var(--accent); }
+/* Big ambient glow ring */
+.visual-glow{
+  position:absolute;
+  width:480px;height:480px;
+  border-radius:50%;
+  background:radial-gradient(circle,rgba(0,200,180,0.10) 0%,rgba(0,100,140,0.05) 50%,transparent 72%);
+  animation:ringPulse 6s ease-in-out infinite;
+  pointer-events:none;
+}
+@keyframes ringPulse{0%,100%{transform:scale(1);opacity:0.7}50%{transform:scale(1.07);opacity:1}}
 
-  /* FILTER BAR */
-  .filter-bar { display:flex; gap:0.5rem; margin-bottom:1.5rem; flex-wrap:wrap; }
-  .filter-btn { padding:0.4rem 1rem; border-radius:20px; border:1px solid var(--border); background:var(--surface); color:var(--muted); cursor:pointer; font-family:'DM Sans',sans-serif; font-size:0.82rem; font-weight:500; transition:all 0.2s; }
-  .filter-btn.active, .filter-btn:hover { border-color:var(--accent); color:var(--accent); background:rgba(240,165,0,0.08); }
-  .search-bar { flex:1; min-width:200px; background:var(--surface); border:1px solid var(--border); border-radius:20px; padding:0.4rem 1rem; color:var(--text); font-family:'DM Sans',sans-serif; font-size:0.85rem; outline:none; }
-  .search-bar:focus { border-color:var(--accent); }
+/* Central magnifying glass */
+.mag-center{
+  position:absolute;
+  width:220px;height:220px;
+  animation:magFloat 7s ease-in-out infinite;
+}
+@keyframes magFloat{
+  0%,100%{transform:translateY(0) rotate(-8deg);}
+  50%{transform:translateY(-18px) rotate(-12deg);}
+}
 
-  /* STATS */
-  .stats-row { display:grid; grid-template-columns:repeat(4,1fr); gap:1rem; margin-bottom:2rem; }
-  .stat-card { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:1.2rem 1.5rem; }
-  .stat-label { font-size:0.78rem; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:0.5rem; }
-  .stat-value { font-family:'Syne',sans-serif; font-size:2rem; font-weight:800; }
-  .stat-value.orange { color:var(--accent); } .stat-value.green { color:var(--success); }
-  .stat-value.red { color:var(--danger); } .stat-value.gray { color:var(--muted); }
+/* Floating item cards orbiting around */
+.orbit-card{
+  position:absolute;
+  background:rgba(22,25,32,0.92);
+  border:1px solid rgba(255,255,255,0.1);
+  border-radius:14px;
+  padding:0.9rem 1.1rem;
+  display:flex;align-items:center;gap:0.7rem;
+  backdrop-filter:blur(12px);
+  box-shadow:0 8px 32px rgba(0,0,0,0.4);
+  animation:cardOrbit var(--d,5s) ease-in-out var(--dl,0s) infinite alternate;
+  pointer-events:none;
+  min-width:150px;
+}
+@keyframes cardOrbit{
+  from{transform:translateY(0) translateX(0);}
+  to{transform:translateY(var(--ty,-14px)) translateX(var(--tx,6px));}
+}
+.orbit-card-icon{font-size:1.5rem;flex-shrink:0;}
+.orbit-card-info{}
+.orbit-card-label{font-family:'Syne',sans-serif;font-size:0.8rem;font-weight:700;color:var(--text);}
+.orbit-card-sub{font-size:0.72rem;color:var(--muted);margin-top:0.1rem;}
+.orbit-card-dot{
+  width:7px;height:7px;border-radius:50%;flex-shrink:0;
+  animation:dotPulse 2s ease-in-out infinite;
+}
+@keyframes dotPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.4;transform:scale(0.7)}}
+.dot-orange{background:var(--accent);}
+.dot-green{background:var(--success);}
+.dot-teal{background:var(--teal);}
 
-  /* TABLE */
-  .status-table { width:100%; border-collapse:collapse; }
-  .status-table th { text-align:left; font-size:0.75rem; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px; padding:0.6rem 1rem; border-bottom:1px solid var(--border); }
-  .status-table td { padding:0.9rem 1rem; border-bottom:1px solid rgba(42,47,66,0.5); font-size:0.85rem; vertical-align:middle; }
-  .status-table tr:hover td { background:rgba(255,255,255,0.02); }
-  .status-table tr:last-child td { border-bottom:none; }
-  .claim-btn { background:rgba(46,204,113,0.1); border:1px solid rgba(46,204,113,0.3); color:var(--success); padding:0.3rem 0.8rem; border-radius:6px; cursor:pointer; font-family:'DM Sans',sans-serif; font-size:0.8rem; font-weight:500; transition:all 0.2s; }
-  .claim-btn:hover { background:rgba(46,204,113,0.2); }
+/* Scan lines inside the lens */
+.lens-scan{
+  position:absolute;
+  left:50%;top:50%;
+  width:160px;height:160px;
+  margin-left:-80px;margin-top:-80px;
+  border-radius:50%;
+  overflow:hidden;
+  pointer-events:none;
+}
+.scan-line{
+  position:absolute;left:0;right:0;height:1px;
+  background:linear-gradient(to right,transparent,rgba(0,200,180,0.6),transparent);
+  animation:scanMove 3s linear infinite;
+}
+@keyframes scanMove{
+  0%{top:0;opacity:0;}
+  10%{opacity:1;}
+  90%{opacity:1;}
+  100%{top:100%;opacity:0;}
+}
 
-  /* EMPTY / LOADING */
-  .empty-state { text-align:center; padding:3rem; color:var(--muted); }
-  .empty-state .empty-icon { font-size:3rem; margin-bottom:1rem; }
-  .loading { text-align:center; padding:2rem; color:var(--muted); font-size:0.9rem; }
+/* Connecting dotted lines from center to cards */
+.connector-svg{
+  position:absolute;inset:0;width:100%;height:100%;pointer-events:none;
+}
 
-  /* TOAST */
-  .toast { position:fixed; bottom:2rem; right:2rem; background:var(--surface2); border:1px solid var(--border); border-left:3px solid var(--success); border-radius:10px; padding:0.8rem 1.2rem; font-size:0.85rem; z-index:1000; transform:translateY(20px); opacity:0; transition:all 0.3s; pointer-events:none; }
-  .toast.show { transform:translateY(0); opacity:1; }
 
-  @media(max-width:700px) {
-    .grid-2 { grid-template-columns:1fr; }
-    .stats-row { grid-template-columns:1fr 1fr; }
-    .item-card { grid-template-columns:auto 1fr; }
-    .item-contact { display:none; }
-  }
+
+/* ══ ABOUT ══ */
+.about-section{
+  position:relative;z-index:10;min-height:100vh;
+  display:flex;align-items:center;padding:6rem 2rem;
+  background:linear-gradient(to bottom,transparent,rgba(8,11,18,0.95) 20%,rgba(8,11,18,0.95) 80%,transparent);
+}
+.about-inner{
+  max-width:960px;margin:0 auto;
+  display:grid;grid-template-columns:1fr 1fr;gap:5rem;align-items:center;
+}
+.about-label{
+  font-size:0.72rem;font-weight:700;letter-spacing:3px;
+  text-transform:uppercase;color:var(--teal);margin-bottom:1rem;
+}
+.about-title{
+  font-family:'Syne',sans-serif;font-size:clamp(2rem,3.5vw,2.8rem);
+  font-weight:800;line-height:1.1;margin-bottom:1.2rem;letter-spacing:-1px;
+}
+.about-title em{font-style:normal;color:var(--accent);}
+.about-body{color:var(--muted);line-height:1.8;font-size:0.95rem;margin-bottom:1.8rem;}
+.feat-list{display:flex;flex-direction:column;gap:0.8rem;}
+.feat-item{
+  display:flex;align-items:flex-start;gap:0.9rem;
+  padding:1rem;background:rgba(255,255,255,0.03);
+  border:1px solid rgba(255,255,255,0.07);border-radius:12px;
+  transition:border-color 0.2s,transform 0.2s;
+}
+.feat-item:hover{border-color:rgba(91,79,255,0.4);transform:translateX(5px);}
+.feat-icon{
+  width:38px;height:38px;border-radius:9px;
+  background:rgba(91,79,255,0.1);border:1px solid rgba(91,79,255,0.2);
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.1rem;flex-shrink:0;
+}
+.feat-text h4{font-family:'Syne',sans-serif;font-size:0.88rem;font-weight:700;margin-bottom:0.2rem;}
+.feat-text p{color:var(--muted);font-size:0.8rem;line-height:1.5;}
+.about-deco{
+  position:relative;width:100%;aspect-ratio:1;max-width:340px;margin:0 auto;
+}
+.deco-card{
+  position:absolute;background:rgba(255,255,255,0.04);
+  border:1px solid rgba(255,255,255,0.08);border-radius:16px;
+  padding:1.2rem;backdrop-filter:blur(10px);
+  animation:cardFloat var(--d,5s) ease-in-out var(--dl,0s) infinite alternate;
+}
+@keyframes cardFloat{from{transform:translateY(0)}to{transform:translateY(-12px)}}
+.deco-card-icon{font-size:1.8rem;margin-bottom:0.5rem;}
+.deco-card-label{font-family:'Syne',sans-serif;font-size:0.78rem;font-weight:700;color:var(--muted);}
+.deco-card-val{font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:800;color:var(--accent);}
+
+.cta-section{
+  position:relative;z-index:10;padding:7rem 2rem;
+  text-align:center;
+  background:rgba(8,11,18,0.98);
+  border-top:1px solid rgba(255,255,255,0.06);overflow:hidden;
+}
+.cta-section::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 60% 80% at 50% 50%,rgba(91,79,255,0.07) 0%,transparent 70%);
+}
+.cta-section h2{
+  font-family:'Syne',sans-serif;font-size:clamp(2rem,4vw,3rem);
+  font-weight:800;margin-bottom:1rem;position:relative;
+}
+.cta-section p{color:var(--muted);font-size:0.97rem;margin-bottom:2.5rem;position:relative;max-width:420px;margin-left:auto;margin-right:auto;}
+.btn-cta{
+  position:relative;padding:1.1rem 3.5rem;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  color:#fff;border:none;border-radius:14px;
+  font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem;
+  cursor:pointer;transition:all 0.3s;
+  box-shadow:0 8px 40px rgba(240,165,0,0.3);
+}
+.btn-cta:hover{transform:translateY(-3px);box-shadow:0 16px 60px rgba(240,165,0,0.5);}
+.land-footer{
+  position:relative;z-index:10;text-align:center;
+  padding:1.5rem;color:var(--muted);font-size:0.78rem;
+  border-top:1px solid rgba(255,255,255,0.06);
+  background:rgba(8,11,18,0.98);
+}
+
+/* ══ APP NAV ══ */
+nav{
+  display:none;position:fixed;top:0;left:0;right:0;z-index:300;
+  background:rgba(13,15,20,0.92);backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--border);padding:0 2rem;height:60px;
+  align-items:center;justify-content:space-between;
+}
+nav.visible{display:flex;}
+.nav-logo{font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem;color:var(--accent);}
+.nav-links{display:flex;gap:0.25rem;}
+.nav-links button{background:none;border:none;color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:0.85rem;padding:0.4rem 0.9rem;border-radius:6px;transition:all 0.2s;font-weight:500;}
+.nav-links button.active,.nav-links button:hover{color:var(--text);background:var(--surface2);}
+.nav-links button.active{color:var(--accent);}
+.nav-right{display:flex;align-items:center;gap:1rem;}
+.nav-user{font-size:0.85rem;color:var(--muted);}
+.btn-logout{background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:0.35rem 0.9rem;border-radius:6px;cursor:pointer;font-size:0.82rem;font-family:'DM Sans',sans-serif;transition:all 0.2s;}
+.btn-logout:hover{border-color:var(--danger);color:var(--danger);}
+
+.page{display:none;position:fixed;inset:0;overflow-y:auto;background:var(--bg);z-index:1;}
+.page.active{display:block;animation:fadeInPage 0.3s ease forwards;}
+@keyframes fadeInPage{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+#page-login{
+  display:none;position:fixed;inset:0;overflow-y:auto;z-index:200;
+  background:radial-gradient(ellipse at 20% 50%,rgba(91,79,255,0.08) 0%,transparent 60%),
+             radial-gradient(ellipse at 80% 20%,rgba(240,165,0,0.07) 0%,transparent 50%),
+             var(--bg);
+}
+#page-login.active{
+  display:flex;align-items:center;justify-content:center;
+  min-height:100vh;animation:fadeInPage 0.3s ease forwards;
+}
+.login-card{width:420px;background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:2.5rem;box-shadow:0 40px 80px rgba(0,0,0,0.5);}
+.login-header{text-align:center;margin-bottom:2rem;}
+.login-icon{width:56px;height:56px;border-radius:14px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:1.5rem;margin:0 auto 1rem;}
+.login-header h1{font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:800;margin-bottom:0.3rem;}
+.login-header p{color:var(--muted);font-size:0.88rem;}
+.login-back{display:inline-flex;align-items:center;gap:0.4rem;color:var(--muted);font-size:0.82rem;cursor:pointer;margin-bottom:1.2rem;transition:color 0.2s;background:none;border:none;padding:0;font-family:'DM Sans',sans-serif;}
+.login-back:hover{color:var(--accent);}
+.login-tabs{display:flex;gap:0.5rem;margin-bottom:1.2rem;}
+.login-tab{flex:1;padding:0.5rem;border:1px solid var(--border);border-radius:8px;background:none;color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:0.85rem;font-weight:500;transition:all 0.2s;}
+.login-tab.active{background:var(--surface2);border-color:var(--accent);color:var(--accent);}
+.register-fields{display:none;}.register-fields.show{display:block;}
+.form-group{margin-bottom:1rem;}
+.form-group label{display:block;font-size:0.78rem;font-weight:500;color:var(--muted);margin-bottom:0.4rem;text-transform:uppercase;letter-spacing:0.5px;}
+.form-group input,.form-group select,.form-group textarea{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:0.7rem 1rem;color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.9rem;transition:border-color 0.2s;outline:none;}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--accent);}
+.form-group select{cursor:pointer;}.form-group textarea{resize:vertical;min-height:80px;}
+.btn-primary{width:100%;padding:0.8rem;border:none;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;font-family:'Syne',sans-serif;font-weight:700;font-size:0.95rem;cursor:pointer;transition:opacity 0.2s,transform 0.1s;}
+.btn-primary:hover{opacity:0.9;}.btn-primary:active{transform:scale(0.98);}.btn-primary:disabled{opacity:0.5;cursor:not-allowed;}
+.login-switch{text-align:center;margin-top:1rem;font-size:0.82rem;color:var(--muted);}
+.login-switch span{color:var(--accent);cursor:pointer;font-weight:500;}.login-switch span:hover{text-decoration:underline;}
+.page-inner{padding-top:80px;padding-bottom:3rem;max-width:1100px;margin:0 auto;padding-left:1.5rem;padding-right:1.5rem;}
+.page-title{font-family:'Syne',sans-serif;font-size:1.7rem;font-weight:800;margin-bottom:0.3rem;}
+.page-sub{color:var(--muted);font-size:0.9rem;margin-bottom:2rem;}
+.section-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:1.8rem;margin-bottom:2rem;}
+.section-card h2{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:700;margin-bottom:1.2rem;display:flex;align-items:center;gap:0.5rem;}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+.upload-area{border:2px dashed var(--border);border-radius:12px;padding:2rem;text-align:center;cursor:pointer;transition:all 0.2s;position:relative;}
+.upload-area:hover{border-color:var(--accent);background:rgba(240,165,0,0.03);}
+.upload-area input[type="file"]{position:absolute;inset:0;opacity:0;cursor:pointer;}
+.upload-area .upload-icon{font-size:2rem;margin-bottom:0.5rem;}
+.upload-area p{color:var(--muted);font-size:0.85rem;}
+.upload-preview{margin-top:1rem;}.upload-preview img{max-height:120px;border-radius:8px;object-fit:cover;}
+.items-grid{display:flex;flex-direction:column;gap:1rem;}
+.item-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1.2rem 1.5rem;display:grid;grid-template-columns:auto 1fr auto;gap:1rem;align-items:center;transition:border-color 0.2s;}
+.item-card:hover{border-color:var(--accent);}
+.item-thumb{width:56px;height:56px;border-radius:10px;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:1.5rem;overflow:hidden;flex-shrink:0;}
+.item-thumb img{width:100%;height:100%;object-fit:cover;}
+.item-info h3{font-family:'Syne',sans-serif;font-weight:700;font-size:0.95rem;margin-bottom:0.2rem;}
+.item-info p{color:var(--muted);font-size:0.82rem;margin-bottom:0.4rem;}
+.item-meta{display:flex;gap:0.5rem;flex-wrap:wrap;}
+.tag{font-size:0.75rem;padding:0.2rem 0.6rem;border-radius:20px;background:var(--surface2);color:var(--muted);border:1px solid var(--border);}
+.tag.location{color:#7eb8f7;border-color:rgba(126,184,247,0.3);background:rgba(126,184,247,0.08);}
+.item-contact{text-align:right;font-size:0.82rem;color:var(--muted);min-width:160px;}
+.item-contact strong{display:block;color:var(--text);font-size:0.88rem;margin-bottom:0.2rem;}
+.contact-link{color:var(--accent);text-decoration:none;font-size:0.8rem;}
+.badge{display:inline-block;font-size:0.72rem;font-weight:600;padding:0.25rem 0.7rem;border-radius:20px;text-transform:uppercase;letter-spacing:0.5px;}
+.badge-pending{background:rgba(243,156,18,0.15);color:var(--warning);}
+.badge-found{background:rgba(46,204,113,0.15);color:var(--success);}
+.badge-collected{background:rgba(127,140,141,0.15);color:#95a5a6;}
+.badge-new{background:rgba(240,165,0,0.15);color:var(--accent);}
+.filter-bar{display:flex;gap:0.5rem;margin-bottom:1.5rem;flex-wrap:wrap;}
+.filter-btn{padding:0.4rem 1rem;border-radius:20px;border:1px solid var(--border);background:var(--surface);color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:0.82rem;font-weight:500;transition:all 0.2s;}
+.filter-btn.active,.filter-btn:hover{border-color:var(--accent);color:var(--accent);background:rgba(240,165,0,0.08);}
+.search-bar{flex:1;min-width:200px;background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:0.4rem 1rem;color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.85rem;outline:none;}
+.search-bar:focus{border-color:var(--accent);}
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:2rem;}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1.2rem 1.5rem;}
+.stat-label{font-size:0.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.5rem;}
+.stat-value{font-family:'Syne',sans-serif;font-size:2rem;font-weight:800;}
+.stat-value.orange{color:var(--accent)}.stat-value.green{color:var(--success)}
+.stat-value.red{color:var(--danger)}.stat-value.gray{color:var(--muted)}
+.status-table{width:100%;border-collapse:collapse;}
+.status-table th{text-align:left;font-size:0.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;padding:0.6rem 1rem;border-bottom:1px solid var(--border);}
+.status-table td{padding:0.9rem 1rem;border-bottom:1px solid rgba(42,47,66,0.5);font-size:0.85rem;vertical-align:middle;}
+.status-table tr:hover td{background:rgba(255,255,255,0.02);}
+.status-table tr:last-child td{border-bottom:none;}
+.claim-btn{background:rgba(46,204,113,0.1);border:1px solid rgba(46,204,113,0.3);color:var(--success);padding:0.3rem 0.8rem;border-radius:6px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:0.8rem;font-weight:500;transition:all 0.2s;}
+.claim-btn:hover{background:rgba(46,204,113,0.2);}
+.action-locked{font-size:0.78rem;color:var(--muted);cursor:default;opacity:0.6;}
+.empty-state{text-align:center;padding:3rem;color:var(--muted);}
+.empty-state .empty-icon{font-size:3rem;margin-bottom:1rem;}
+.loading{text-align:center;padding:2rem;color:var(--muted);font-size:0.9rem;}
+.toast{position:fixed;bottom:2rem;right:2rem;background:var(--surface2);border:1px solid var(--border);border-left:3px solid var(--success);border-radius:10px;padding:0.8rem 1.2rem;font-size:0.85rem;z-index:9999;transform:translateY(20px);opacity:0;transition:all 0.3s;pointer-events:none;}
+.toast.show{transform:translateY(0);opacity:1;}
+@keyframes scrollBounce{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(6px)}}
+
+@media(max-width:1100px){
+  .hero-layout{grid-template-columns:1fr 420px;}
+  .hero-visual{width:420px;}
+  .hero-text{padding:5rem 2.5rem 5rem 3rem;}
+}
+@media(max-width:800px){
+  .hero-layout{grid-template-columns:1fr;min-height:auto;}
+  .hero-visual{width:100%;height:60vw;position:relative;}
+  .hero-text{padding:5rem 2rem 2rem;}
+  .hero-sub{max-width:100%;}
+  .hero-btns{justify-content:flex-start;}
+  .about-inner{grid-template-columns:1fr;}
+  .about-right{display:none;}
+  .land-nav-links a:not(.land-nav-cta){display:none;}
+  .grid-2{grid-template-columns:1fr;}
+  .stats-row{grid-template-columns:1fr 1fr;}
+  .item-card{grid-template-columns:auto 1fr;}
+  .item-contact{display:none;}
+}
 </style>
 </head>
 <body>
 
-<!-- NAV -->
+<div id="landing-wrapper">
+
+  <div class="scene-bg">
+    <svg style="position:absolute;bottom:0;left:0;width:100%;height:35vh;" viewBox="0 0 1440 300" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M0,300 L0,180 L30,180 L30,120 L60,120 L60,100 L80,100 L80,80 L100,80 L100,60 L120,60 L120,80 L140,80 L140,100 L160,100 L160,140 L180,140 L180,110 L200,110 L200,130 L220,130 L220,90 L240,90 L240,70 L260,70 L260,50 L280,50 L280,70 L300,70 L300,90 L320,90 L320,130 L340,130 L340,100 L360,100 L360,80 L380,80 L380,60 L400,60 L400,40 L420,40 L420,60 L440,60 L440,80 L460,80 L460,150 L480,150 L480,120 L510,120 L510,90 L530,90 L530,70 L550,70 L550,50 L570,50 L570,30 L590,30 L590,50 L610,50 L610,70 L630,70 L630,90 L650,90 L650,120 L670,120 L670,140 L700,140 L700,110 L720,110 L720,90 L740,90 L740,70 L760,70 L760,50 L780,50 L780,70 L800,70 L800,90 L820,90 L820,130 L840,130 L840,150 L860,150 L860,120 L880,120 L880,100 L900,100 L900,80 L920,80 L920,60 L940,60 L940,80 L960,80 L960,100 L980,100 L980,140 L1000,140 L1000,110 L1020,110 L1020,80 L1040,80 L1040,60 L1060,60 L1060,40 L1080,40 L1080,60 L1100,60 L1100,80 L1120,80 L1120,90 L1140,90 L1140,120 L1160,120 L1160,100 L1180,100 L1180,80 L1200,80 L1200,60 L1220,60 L1220,80 L1240,80 L1240,120 L1260,120 L1260,140 L1280,140 L1280,160 L1300,160 L1300,130 L1320,130 L1320,110 L1340,110 L1340,130 L1360,130 L1360,160 L1380,160 L1380,180 L1440,180 L1440,300 Z" fill="#080b12"/>
+      <rect x="265" y="58" width="6" height="5" fill="rgba(240,165,0,0.6)" rx="1"/>
+      <rect x="275" y="58" width="6" height="5" fill="rgba(240,165,0,0.4)" rx="1"/>
+      <rect x="265" y="68" width="6" height="5" fill="rgba(255,255,255,0.3)" rx="1"/>
+      <rect x="405" y="48" width="6" height="5" fill="rgba(240,165,0,0.7)" rx="1"/>
+      <rect x="415" y="48" width="6" height="5" fill="rgba(240,165,0,0.3)" rx="1"/>
+      <rect x="405" y="58" width="6" height="5" fill="rgba(255,255,255,0.2)" rx="1"/>
+      <rect x="555" y="38" width="6" height="5" fill="rgba(91,79,255,0.8)" rx="1"/>
+      <rect x="565" y="38" width="6" height="5" fill="rgba(240,165,0,0.5)" rx="1"/>
+      <rect x="575" y="38" width="6" height="5" fill="rgba(91,79,255,0.4)" rx="1"/>
+      <rect x="555" y="48" width="6" height="5" fill="rgba(255,255,255,0.3)" rx="1"/>
+      <rect x="765" y="58" width="6" height="5" fill="rgba(240,165,0,0.6)" rx="1"/>
+      <rect x="775" y="58" width="6" height="5" fill="rgba(255,255,255,0.2)" rx="1"/>
+      <rect x="1065" y="48" width="6" height="5" fill="rgba(240,165,0,0.7)" rx="1"/>
+      <rect x="1075" y="48" width="6" height="5" fill="rgba(91,79,255,0.5)" rx="1"/>
+      <rect x="1085" y="48" width="6" height="5" fill="rgba(240,165,0,0.3)" rx="1"/>
+      <rect x="1065" y="58" width="6" height="5" fill="rgba(255,255,255,0.2)" rx="1"/>
+    </svg>
+    <div class="fog fog1"></div>
+    <div class="fog fog2"></div>
+    <div class="fog fog3"></div>
+    <div class="lamp-glow" style="width:200px;height:200px;bottom:28%;left:12%;"></div>
+    <div class="lamp-glow" style="width:160px;height:160px;bottom:26%;right:18%;animation-delay:-1.5s;"></div>
+    <div class="lamp-glow" style="width:120px;height:120px;bottom:24%;left:45%;animation-delay:-0.8s;"></div>
+  </div>
+
+  <canvas id="stars-canvas" style="position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:1;"></canvas>
+
+  <nav class="land-nav" style="position:sticky;z-index:200;">
+    <div class="land-nav-logo">🧭 <span>Campus Compass</span></div>
+    <div class="land-nav-links">
+      <a href="#hero">Home</a>
+      <a href="#about">About</a>
+      <a class="land-nav-cta" href="#cta">Login →</a>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero-section" id="hero">
+    <div class="hero-layout">
+      <!-- Left: text -->
+      <div class="hero-text">
+        <h1 class="hero-title">
+          <span class="t1">Campus</span>
+          <span class="t2">Compass</span>
+        </h1>
+        <p class="hero-sub">Your campus lost &amp; found — report missing items, browse what's been turned in, and get reunited with your belongings.</p>
+        <div class="hero-btns">
+          <button class="btn-hp" onclick="goToLogin()">Get Started →</button>
+          <button class="btn-hs" onclick="document.getElementById('about').scrollIntoView({behavior:'smooth'})">Learn More</button>
+        </div>
+      </div>
+
+      <!-- Right: animated visual panel (no detective) -->
+      <div class="hero-visual">
+        <!-- Ambient glow -->
+        <div class="visual-glow"></div>
+
+        <!-- SVG connector lines -->
+        <svg class="connector-svg" viewBox="0 0 520 700" xmlns="http://www.w3.org/2000/svg">
+          <!-- lines from center (260,350) to card positions -->
+          <line x1="260" y1="350" x2="90" y2="185" stroke="rgba(0,200,180,0.15)" stroke-width="1" stroke-dasharray="5,5"/>
+          <line x1="260" y1="350" x2="390" y2="160" stroke="rgba(240,165,0,0.12)" stroke-width="1" stroke-dasharray="5,5"/>
+          <line x1="260" y1="350" x2="60" y2="390" stroke="rgba(91,79,255,0.15)" stroke-width="1" stroke-dasharray="5,5"/>
+          <line x1="260" y1="350" x2="380" y2="430" stroke="rgba(0,200,180,0.12)" stroke-width="1" stroke-dasharray="5,5"/>
+          <line x1="260" y1="350" x2="160" y2="530" stroke="rgba(240,165,0,0.1)" stroke-width="1" stroke-dasharray="5,5"/>
+          <!-- Decorative orbit rings -->
+          <circle cx="260" cy="350" r="130" fill="none" stroke="rgba(255,255,255,0.04)" stroke-width="1" stroke-dasharray="3,8"/>
+          <circle cx="260" cy="350" r="210" fill="none" stroke="rgba(255,255,255,0.03)" stroke-width="1" stroke-dasharray="2,10"/>
+        </svg>
+
+        <!-- Central magnifying glass SVG -->
+        <div class="mag-center">
+          <svg width="220" height="220" viewBox="0 0 220 220" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <radialGradient id="lensCoreH" cx="38%" cy="32%" r="65%">
+                <stop offset="0%" stop-color="rgba(180,255,240,0.95)"/>
+                <stop offset="30%" stop-color="rgba(0,210,185,0.7)"/>
+                <stop offset="65%" stop-color="rgba(0,160,200,0.45)"/>
+                <stop offset="100%" stop-color="rgba(20,60,80,0.2)"/>
+              </radialGradient>
+              <filter id="lensBloomH" x="-40%" y="-40%" width="180%" height="180%">
+                <feGaussianBlur stdDeviation="10" result="blur"/>
+                <feColorMatrix in="blur" type="matrix" values="0 0 0 0 0  0 1 0.8 0 0.7  0 0.8 1 0 0.6  0 0 0 0.9 0" result="coloredBlur"/>
+                <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+              </filter>
+            </defs>
+            <!-- Outer bloom -->
+            <circle cx="90" cy="90" r="88" fill="rgba(0,200,180,0.05)" filter="url(#lensBloomH)"/>
+            <!-- Frame shadow -->
+            <circle cx="90" cy="90" r="78" fill="none" stroke="#3a2808" stroke-width="14"/>
+            <!-- Frame gold outer -->
+            <circle cx="90" cy="90" r="78" fill="none" stroke="#c8a030" stroke-width="9"/>
+            <!-- Frame highlight arc -->
+            <path d="M34,62 A78,78 0 0 1 132,26" fill="none" stroke="rgba(255,220,100,0.65)" stroke-width="3.5" stroke-linecap="round"/>
+            <!-- Frame inner rim -->
+            <circle cx="90" cy="90" r="70" fill="none" stroke="#3a2808" stroke-width="2"/>
+            <!-- Lens fill -->
+            <circle cx="90" cy="90" r="69" fill="url(#lensCoreH)"/>
+            <!-- Dark tint -->
+            <circle cx="90" cy="90" r="69" fill="rgba(0,40,30,0.22)"/>
+            <!-- Main specular highlight -->
+            <ellipse cx="64" cy="66" rx="24" ry="14" fill="rgba(255,255,255,0.55)" transform="rotate(-30,64,66)"/>
+            <!-- Secondary specular -->
+            <ellipse cx="112" cy="62" rx="11" ry="6" fill="rgba(255,255,255,0.28)" transform="rotate(20,112,62)"/>
+            <!-- Scan line inside lens -->
+            <clipPath id="lensClipH"><circle cx="90" cy="90" r="69"/></clipPath>
+            <rect x="21" y="0" width="138" height="2" fill="rgba(0,200,180,0.5)" clip-path="url(#lensClipH)" style="animation:scanMove 3s linear infinite">
+              <animateTransform attributeName="transform" type="translate" from="0 21" to="0 159" dur="3s" repeatCount="indefinite"/>
+            </rect>
+            <!-- Concentric rings -->
+            <circle cx="90" cy="90" r="55" fill="none" stroke="rgba(0,220,200,0.14)" stroke-width="1"/>
+            <circle cx="90" cy="90" r="38" fill="none" stroke="rgba(0,220,200,0.18)" stroke-width="1"/>
+            <circle cx="90" cy="90" r="20" fill="none" stroke="rgba(0,220,200,0.25)" stroke-width="1"/>
+            <!-- Bottom edge reflection -->
+            <path d="M42,148 Q90,160 138,148" stroke="rgba(150,255,220,0.28)" stroke-width="2" fill="none"/>
+            <!-- Handle — mahogany + gold ferrule -->
+            <path d="M138,148 C148,158 168,180 188,205 C192,210 194,216 191,218 C188,220 183,218 179,213 C163,194 144,172 132,160Z" fill="#5a3010"/>
+            <path d="M140,150 C150,162 170,184 188,208" stroke="rgba(200,140,60,0.45)" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+            <path d="M139,151 C149,163 169,185 187,209" stroke="rgba(255,200,100,0.2)" stroke-width="1" fill="none" stroke-linecap="round"/>
+            <!-- Ferrule -->
+            <ellipse cx="136" cy="155" rx="7" ry="4" fill="#c8a030" transform="rotate(40,136,155)"/>
+            <ellipse cx="136" cy="155" rx="5" ry="2.5" fill="#f0c840" transform="rotate(40,136,155)" opacity="0.7"/>
+          </svg>
+        </div>
+
+        <!-- Floating item cards -->
+        <!-- Top-left: lost laptop -->
+        <div class="orbit-card" style="top:14%;left:2%;--d:5.5s;--dl:0s;--ty:-14px;--tx:8px;">
+          <div class="orbit-card-icon">💻</div>
+          <div class="orbit-card-info">
+            <div class="orbit-card-label">MacBook Pro</div>
+            <div class="orbit-card-sub">Library · 2nd Floor</div>
+          </div>
+          <div class="orbit-card-dot dot-orange"></div>
+        </div>
+
+        <!-- Top-right: found keys -->
+        <div class="orbit-card" style="top:11%;right:1%;--d:4.8s;--dl:-1.5s;--ty:-10px;--tx:-6px;">
+          <div class="orbit-card-icon">🔑</div>
+          <div class="orbit-card-info">
+            <div class="orbit-card-label">Keys Found</div>
+            <div class="orbit-card-sub">Block C Corridor</div>
+          </div>
+          <div class="orbit-card-dot dot-green"></div>
+        </div>
+
+        <!-- Left-mid: lost ID card -->
+        <div class="orbit-card" style="top:42%;left:0%;--d:6s;--dl:-0.8s;--ty:-18px;--tx:10px;">
+          <div class="orbit-card-icon">🪪</div>
+          <div class="orbit-card-info">
+            <div class="orbit-card-label">Student ID</div>
+            <div class="orbit-card-sub">Canteen · Pending</div>
+          </div>
+          <div class="orbit-card-dot dot-orange"></div>
+        </div>
+
+        <!-- Right-mid: found bag -->
+        <div class="orbit-card" style="top:52%;right:0%;--d:5.2s;--dl:-2s;--ty:-12px;--tx:-8px;">
+          <div class="orbit-card-icon">🎒</div>
+          <div class="orbit-card-info">
+            <div class="orbit-card-label">Black Backpack</div>
+            <div class="orbit-card-sub">Security Desk</div>
+          </div>
+          <div class="orbit-card-dot dot-teal"></div>
+        </div>
+
+        <!-- Bottom-left: watch -->
+        <div class="orbit-card" style="bottom:20%;left:4%;--d:4.5s;--dl:-3s;--ty:-10px;--tx:6px;">
+          <div class="orbit-card-icon">⌚</div>
+          <div class="orbit-card-info">
+            <div class="orbit-card-label">Casio Watch</div>
+            <div class="orbit-card-sub">Collected ✓</div>
+          </div>
+          <div class="orbit-card-dot dot-green"></div>
+        </div>
+
+
+      </div>
+    </div>
+
+    <div style="position:absolute;bottom:2rem;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:0.4rem;color:var(--muted);font-size:0.72rem;letter-spacing:1px;text-transform:uppercase;animation:scrollBounce 2s infinite;z-index:10;">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" opacity="0.5"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+      Scroll
+    </div>
+  </section>
+
+  <!-- ABOUT -->
+  <section class="about-section" id="about">
+    <div class="about-inner">
+      <div>
+        <div class="about-label">About the Platform</div>
+        <h2 class="about-title">Reconnecting people<br>with what <em>matters</em></h2>
+        <p class="about-body">Campus Compass is a community-driven lost and found platform built exclusively for SRM University students and staff. Whether you've misplaced your laptop in the library or found someone's keys in the canteen — this is where things get found.</p>
+        <div class="feat-list">
+          <div class="feat-item">
+            <div class="feat-icon">📋</div>
+            <div class="feat-text"><h4>Smart Reporting</h4><p>Report lost or found items in seconds with photos, location, and category tags.</p></div>
+          </div>
+          <div class="feat-item">
+            <div class="feat-icon">🔒</div>
+            <div class="feat-text"><h4>Ownership Verified</h4><p>Only the reporter or an admin can update item status — preventing misuse.</p></div>
+          </div>
+          <div class="feat-item">
+            <div class="feat-icon">📡</div>
+            <div class="feat-text"><h4>Live Status Board</h4><p>Track every report in real-time with a full dashboard of lost and found items.</p></div>
+          </div>
+        </div>
+      </div>
+      <div class="about-right" style="position:relative;height:380px;">
+        <div class="deco-card" style="top:0;left:20px;width:150px;--d:4s;--dl:0s;">
+          <div class="deco-card-icon">🔍</div>
+          <div class="deco-card-label">Report Lost</div>
+        </div>
+        <div class="deco-card" style="top:80px;right:10px;width:160px;--d:5s;--dl:-1.5s;">
+          <div class="deco-card-icon">📦</div>
+          <div class="deco-card-label">Found Items</div>
+        </div>
+        <div class="deco-card" style="top:200px;left:40px;width:170px;--d:3.8s;--dl:-0.8s;">
+          <div class="deco-card-icon">✅</div>
+          <div class="deco-card-label">Status Board</div>
+        </div>
+        <div class="deco-card" style="top:290px;right:30px;width:140px;--d:4.5s;--dl:-2s;">
+          <div class="deco-card-icon">🧭</div>
+          <div class="deco-card-label">Campus Compass</div>
+        </div>
+        <svg style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;" viewBox="0 0 380 380">
+          <line x1="120" y1="60" x2="290" y2="100" stroke="rgba(91,79,255,0.2)" stroke-width="1" stroke-dasharray="4,4"/>
+          <line x1="290" y1="100" x2="160" y2="220" stroke="rgba(240,165,0,0.2)" stroke-width="1" stroke-dasharray="4,4"/>
+          <line x1="160" y1="220" x2="310" y2="310" stroke="rgba(0,201,177,0.2)" stroke-width="1" stroke-dasharray="4,4"/>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta-section" id="cta">
+    <h2>Ready to get started?</h2>
+    <p>Join your campus community and help reunite people with their belongings.</p>
+    <button class="btn-cta" onclick="goToLogin()">🔑 Login to Campus Compass</button>
+  </section>
+
+  <div class="land-footer">© 2026 Campus Compass · Built for SRM University</div>
+</div>
+
+<!-- APP NAV -->
 <nav id="main-nav">
   <div class="nav-logo">🧭 Campus Compass</div>
   <div class="nav-links">
@@ -156,226 +696,103 @@
   </div>
 </nav>
 
-<!-- ══════════════════ LOGIN PAGE ══════════════════ -->
-<div id="page-login" class="page active">
+<!-- LOGIN -->
+<div id="page-login" class="page">
   <div class="login-card">
+    <button class="login-back" onclick="backToLanding()">← Back to home</button>
     <div class="login-header">
       <div class="login-icon">🧭</div>
       <h1>Campus Compass</h1>
-      <p>Lost & Found Management System</p>
+      <p>Lost &amp; Found Management System</p>
     </div>
-
     <div class="login-tabs">
-      <button class="login-tab active" onclick="switchAuthMode('login', this)">Login</button>
-      <button class="login-tab" onclick="switchAuthMode('register', this)">Register</button>
+      <button class="login-tab active" onclick="switchAuthMode('login',this)">Login</button>
+      <button class="login-tab" onclick="switchAuthMode('register',this)">Register</button>
     </div>
-
     <div class="register-fields" id="register-fields">
-      <div class="form-group">
-        <label>Full Name</label>
-        <input type="text" id="reg-name" placeholder="e.g. Priya Ramesh">
-      </div>
-      <div class="form-group">
-        <label>Phone Number</label>
-        <input type="tel" id="reg-phone" placeholder="e.g. 9876543210">
-      </div>
-      <div class="form-group">
-        <label>Role</label>
-        <select id="reg-role">
-          <option value="student">Student</option>
-          <option value="staff">Staff</option>
-          <option value="admin">Admin</option>
-        </select>
-      </div>
+      <div class="form-group"><label>Full Name</label><input type="text" id="reg-name" placeholder="e.g. Priya Ramesh"></div>
+      <div class="form-group"><label>Phone Number</label><input type="tel" id="reg-phone" placeholder="e.g. 9876543210"></div>
+      <div class="form-group"><label>Role</label><select id="reg-role"><option value="student">Student</option><option value="staff">Staff</option><option value="admin">Admin</option></select></div>
     </div>
-
-    <div class="form-group">
-      <label>Register Number</label>
-      <input type="text" id="auth-regno" placeholder="e.g. 22CS001">
-    </div>
-    <div class="form-group">
-      <label>Email</label>
-      <input type="email" id="auth-email" placeholder="you@college.edu">
-    </div>
-    <div class="form-group">
-      <label>Password</label>
-      <input type="password" id="auth-password" placeholder="••••••••">
-    </div>
-
+    <div class="form-group"><label>Register Number</label><input type="text" id="auth-regno" placeholder="e.g. 22CS001"></div>
+    <div class="form-group"><label>Email</label><input type="email" id="auth-email" placeholder="you@college.edu"></div>
+    <div class="form-group"><label>Password</label><input type="password" id="auth-password" placeholder="••••••••"></div>
     <button class="btn-primary" id="auth-btn" onclick="handleAuth()">Sign In →</button>
-    <div class="login-switch" id="auth-switch">
-      Don't have an account? <span onclick="switchAuthMode('register', document.querySelectorAll('.login-tab')[1])">Register here</span>
-    </div>
+    <div class="login-switch" id="auth-switch">Don't have an account? <span onclick="switchAuthMode('register',document.querySelectorAll('.login-tab')[1])">Register here</span></div>
   </div>
 </div>
 
-<!-- ══════════════════ REPORT LOST ══════════════════ -->
+<!-- REPORT LOST -->
 <div id="page-report-lost" class="page">
   <div class="page-inner">
     <div class="page-title">Report a Lost Item</div>
     <div class="page-sub">Fill in the details so others can help identify your item</div>
-    <div class="section-card">
-      <h2>📋 Item Details</h2>
+    <div class="section-card"><h2>📋 Item Details</h2>
       <div class="grid-2">
-        <div class="form-group">
-          <label>Item Name</label>
-          <input type="text" id="lost-item-name" placeholder="e.g. Blue Casio Watch">
-        </div>
-        <div class="form-group">
-          <label>Category</label>
-          <select id="lost-category">
-            <option value="">Select category</option>
-            <option value="1">Electronics</option>
-            <option value="2">Stationery</option>
-            <option value="3">Clothing</option>
-            <option value="4">Accessories</option>
-            <option value="5">Documents / ID</option>
-            <option value="6">Keys</option>
-            <option value="7">Bags</option>
-            <option value="8">Water Bottle</option>
-            <option value="9">Other</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Date Lost</label>
-          <input type="date" id="lost-date">
-        </div>
-        <div class="form-group">
-          <label>Last Known Location</label>
-          <input type="text" id="lost-location" placeholder="e.g. Library 2nd Floor, Canteen">
-        </div>
+        <div class="form-group"><label>Item Name</label><input type="text" id="lost-item-name" placeholder="e.g. Blue Casio Watch"></div>
+        <div class="form-group"><label>Category</label><select id="lost-category"><option value="">Select category</option><option value="1">Electronics</option><option value="2">Stationery</option><option value="3">Clothing</option><option value="4">Accessories</option><option value="5">Documents / ID</option><option value="6">Keys</option><option value="7">Bags</option><option value="8">Water Bottle</option><option value="9">Other</option></select></div>
+        <div class="form-group"><label>Date Lost</label><input type="date" id="lost-date"></div>
+        <div class="form-group"><label>Last Known Location</label><input type="text" id="lost-location" placeholder="e.g. Library 2nd Floor, Canteen"></div>
       </div>
-      <div class="form-group">
-        <label>Description</label>
-        <textarea id="lost-description" placeholder="Color, brand, any unique markings..."></textarea>
-      </div>
+      <div class="form-group"><label>Description</label><textarea id="lost-description" placeholder="Color, brand, any unique markings..."></textarea></div>
     </div>
-    <div class="section-card">
-      <h2>📷 Upload Photo (Optional)</h2>
-      <div class="upload-area">
-        <input type="file" accept="image/*" id="lost-photo" onchange="previewImage('lost-photo','lost-preview')">
-        <div class="upload-icon">🖼️</div>
-        <p>Click to upload or drag & drop a photo</p>
-        <div class="upload-preview" id="lost-preview"></div>
-      </div>
+    <div class="section-card"><h2>📷 Upload Photo (Optional)</h2>
+      <div class="upload-area"><input type="file" accept="image/*" id="lost-photo" onchange="previewImage('lost-photo','lost-preview')"><div class="upload-icon">🖼️</div><p>Click to upload or drag &amp; drop a photo</p><div class="upload-preview" id="lost-preview"></div></div>
     </div>
     <button class="btn-primary" style="max-width:300px" id="lost-submit-btn" onclick="submitLostItem()">Submit Report →</button>
   </div>
 </div>
 
-<!-- ══════════════════ FOUND ITEMS ══════════════════ -->
+<!-- FOUND ITEMS -->
 <div id="page-found-items" class="page">
   <div class="page-inner">
     <div class="page-title">Report a Found Item</div>
     <div class="page-sub">Found something? Submit it here so the owner can reclaim it</div>
-    <div class="section-card">
-      <h2>📋 Found Item Details</h2>
+    <div class="section-card"><h2>📋 Found Item Details</h2>
       <div class="grid-2">
-        <div class="form-group">
-          <label>Item Name</label>
-          <input type="text" id="found-item-name" placeholder="e.g. Black Umbrella">
-        </div>
-        <div class="form-group">
-          <label>Category</label>
-          <select id="found-category">
-            <option value="">Select category</option>
-            <option value="1">Electronics</option>
-            <option value="2">Stationery</option>
-            <option value="3">Clothing</option>
-            <option value="4">Accessories</option>
-            <option value="5">Documents / ID</option>
-            <option value="6">Keys</option>
-            <option value="7">Bags</option>
-            <option value="8">Water Bottle</option>
-            <option value="9">Other</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Date Found</label>
-          <input type="date" id="found-date">
-        </div>
-        <div class="form-group">
-          <label>Location Found</label>
-          <input type="text" id="found-location" placeholder="e.g. Block C Corridor">
-        </div>
-        <div class="form-group">
-          <label>Currently Kept At</label>
-          <input type="text" id="found-kept-at" placeholder="e.g. Security Desk, HOD Room">
-        </div>
+        <div class="form-group"><label>Item Name</label><input type="text" id="found-item-name" placeholder="e.g. Black Umbrella"></div>
+        <div class="form-group"><label>Category</label><select id="found-category"><option value="">Select category</option><option value="1">Electronics</option><option value="2">Stationery</option><option value="3">Clothing</option><option value="4">Accessories</option><option value="5">Documents / ID</option><option value="6">Keys</option><option value="7">Bags</option><option value="8">Water Bottle</option><option value="9">Other</option></select></div>
+        <div class="form-group"><label>Date Found</label><input type="date" id="found-date"></div>
+        <div class="form-group"><label>Location Found</label><input type="text" id="found-location" placeholder="e.g. Block C Corridor"></div>
+        <div class="form-group"><label>Currently Kept At</label><input type="text" id="found-kept-at" placeholder="e.g. Security Desk, HOD Room"></div>
       </div>
-      <div class="form-group">
-        <label>Description</label>
-        <textarea id="found-description" placeholder="Color, brand, condition..."></textarea>
-      </div>
+      <div class="form-group"><label>Description</label><textarea id="found-description" placeholder="Color, brand, condition..."></textarea></div>
     </div>
-    <div class="section-card">
-      <h2>📷 Upload Photo</h2>
-      <div class="upload-area">
-        <input type="file" accept="image/*" id="found-photo" onchange="previewImage('found-photo','found-preview')">
-        <div class="upload-icon">📸</div>
-        <p>Upload a clear photo to help the owner identify it</p>
-        <div class="upload-preview" id="found-preview"></div>
-      </div>
+    <div class="section-card"><h2>📷 Upload Photo</h2>
+      <div class="upload-area"><input type="file" accept="image/*" id="found-photo" onchange="previewImage('found-photo','found-preview')"><div class="upload-icon">📸</div><p>Upload a clear photo to help the owner identify it</p><div class="upload-preview" id="found-preview"></div></div>
     </div>
     <button class="btn-primary" style="max-width:300px;margin-bottom:2.5rem" id="found-submit-btn" onclick="submitFoundItem()">Submit Found Item →</button>
-
     <div class="page-title" style="font-size:1.3rem;margin-bottom:0.3rem">Browse Found Items</div>
     <div class="page-sub">Check if your lost item has been turned in</div>
     <div class="filter-bar">
       <input class="search-bar" placeholder="Search items..." oninput="renderFoundList(this.value)">
-      <button class="filter-btn active" onclick="filterFoundCat('', this)">All</button>
-      <button class="filter-btn" onclick="filterFoundCat('Electronics', this)">Electronics</button>
-      <button class="filter-btn" onclick="filterFoundCat('Accessories', this)">Accessories</button>
-      <button class="filter-btn" onclick="filterFoundCat('Documents / ID', this)">Docs / ID</button>
-      <button class="filter-btn" onclick="filterFoundCat('Bags', this)">Bags</button>
+      <button class="filter-btn active" onclick="filterFoundCat('',this)">All</button>
+      <button class="filter-btn" onclick="filterFoundCat('Electronics',this)">Electronics</button>
+      <button class="filter-btn" onclick="filterFoundCat('Accessories',this)">Accessories</button>
+      <button class="filter-btn" onclick="filterFoundCat('Documents / ID',this)">Docs / ID</button>
+      <button class="filter-btn" onclick="filterFoundCat('Bags',this)">Bags</button>
     </div>
     <div id="found-items-list" class="items-grid"></div>
   </div>
 </div>
 
-<!-- ══════════════════ STATUS BOARD ══════════════════ -->
+<!-- STATUS BOARD -->
 <div id="page-status" class="page">
   <div class="page-inner">
     <div class="page-title">Status Board</div>
-    <div class="page-sub">Live view of all lost & found reports from the database</div>
-    <div class="stats-row" id="stats-row">
+    <div class="page-sub">Live view of all lost &amp; found reports from the database</div>
+    <div class="stats-row">
       <div class="stat-card"><div class="stat-label">Total Lost</div><div class="stat-value orange" id="stat-lost">—</div></div>
       <div class="stat-card"><div class="stat-label">Found Reports</div><div class="stat-value green" id="stat-found">—</div></div>
       <div class="stat-card"><div class="stat-label">Unclaimed</div><div class="stat-value red" id="stat-unclaimed">—</div></div>
       <div class="stat-card"><div class="stat-label">Collected</div><div class="stat-value gray" id="stat-collected">—</div></div>
     </div>
-
-    <div class="section-card">
-      <h2>🔍 Lost Item Reports</h2>
-      <div class="filter-bar">
-        <input class="search-bar" placeholder="Search lost items..." oninput="renderLostTable(this.value)">
-      </div>
-      <div style="overflow-x:auto">
-        <table class="status-table">
-          <thead>
-            <tr>
-              <th>Item</th><th>Category</th><th>Date</th><th>Location</th>
-              <th>Reporter</th><th>Reg. No.</th><th>Contact</th><th>Status</th>
-            </tr>
-          </thead>
-          <tbody id="lost-status-body"></tbody>
-        </table>
-      </div>
+    <div class="section-card"><h2>🔍 Lost Item Reports</h2>
+      <div class="filter-bar"><input class="search-bar" placeholder="Search lost items..." oninput="renderLostTable(this.value)"></div>
+      <div style="overflow-x:auto"><table class="status-table"><thead><tr><th>Item</th><th>Category</th><th>Date</th><th>Location</th><th>Reporter</th><th>Reg. No.</th><th>Contact</th><th>Status</th></tr></thead><tbody id="lost-status-body"></tbody></table></div>
     </div>
-
-    <div class="section-card">
-      <h2>✅ Found Item Reports</h2>
-      <div style="overflow-x:auto">
-        <table class="status-table">
-          <thead>
-            <tr>
-              <th>Item</th><th>Category</th><th>Date Found</th><th>Location</th>
-              <th>Kept At</th><th>Found By</th><th>Reg. No.</th><th>Contact</th><th>Status</th><th>Action</th>
-            </tr>
-          </thead>
-          <tbody id="found-status-body"></tbody>
-        </table>
-      </div>
+    <div class="section-card"><h2>✅ Found Item Reports</h2>
+      <div style="overflow-x:auto"><table class="status-table"><thead><tr><th>Item</th><th>Category</th><th>Date Found</th><th>Location</th><th>Kept At</th><th>Found By</th><th>Reg. No.</th><th>Contact</th><th>Status</th><th>Action</th></tr></thead><tbody id="found-status-body"></tbody></table></div>
     </div>
   </div>
 </div>
@@ -383,453 +800,269 @@
 <div class="toast" id="toast"></div>
 
 <script>
-// ═══════════════════════════════════════════════════════════
-//   CONFIG
-// ═══════════════════════════════════════════════════════════
-const API_BASE = 'http://localhost:3000/api';
-
-// ═══════════════════════════════════════════════════════════
-//   STATE
-// ═══════════════════════════════════════════════════════════
-let currentUser    = null;
-let authToken      = localStorage.getItem('cc_token') || null;
-let authMode       = 'login';
-let foundCatFilter = '';
-let allFoundItems  = [];
-let allLostItems   = [];
-
-// ═══════════════════════════════════════════════════════════
-//   API HELPER
-// ═══════════════════════════════════════════════════════════
-async function api(endpoint, options = {}) {
-  const headers = { ...(options.headers || {}) };
-  if (!(options.body instanceof FormData)) {
-    headers['Content-Type'] = 'application/json';
+(function(){
+  const c=document.getElementById('stars-canvas');
+  const ctx=c.getContext('2d');
+  let stars=[];
+  function resize(){c.width=window.innerWidth;c.height=window.innerHeight;}
+  function init(){
+    stars=[];
+    for(let i=0;i<200;i++){
+      stars.push({x:Math.random()*c.width,y:Math.random()*c.height*0.7,
+        r:Math.random()*1.5+0.3,a:Math.random(),da:(Math.random()-0.5)*0.008});
+    }
   }
-  if (authToken) headers['Authorization'] = `Bearer ${authToken}`;
-  const res = await fetch(`${API_BASE}${endpoint}`, { ...options, headers });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.error || 'Something went wrong');
+  function draw(){
+    ctx.clearRect(0,0,c.width,c.height);
+    stars.forEach(s=>{
+      s.a+=s.da;
+      if(s.a<=0||s.a>=1) s.da*=-1;
+      ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
+      ctx.fillStyle=`rgba(255,255,255,${s.a*0.8})`;ctx.fill();
+    });
+    requestAnimationFrame(draw);
+  }
+  window.addEventListener('resize',()=>{resize();init();});
+  resize();init();draw();
+})();
+
+function goToLogin(){
+  const lw=document.getElementById('landing-wrapper');
+  lw.classList.add('hide');
+  setTimeout(()=>{
+    lw.style.display='none';
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+    const login=document.getElementById('page-login');
+    login.classList.add('active');
+  },500);
+}
+function backToLanding(){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  const lw=document.getElementById('landing-wrapper');
+  lw.style.display='block';
+  setTimeout(()=>lw.classList.remove('hide'),10);
+}
+
+const API_BASE='http://localhost:3000/api';
+let currentUser=null,authToken=localStorage.getItem('cc_token')||null;
+let authMode='login',foundCatFilter='',allFoundItems=[],allLostItems=[];
+
+async function api(endpoint,options={}){
+  const headers={...(options.headers||{})};
+  if(!(options.body instanceof FormData)) headers['Content-Type']='application/json';
+  if(authToken) headers['Authorization']=`Bearer ${authToken}`;
+  const res=await fetch(`${API_BASE}${endpoint}`,{...options,headers});
+  const data=await res.json();
+  if(!res.ok) throw new Error(data.error||'Something went wrong');
   return data;
 }
 
-// ═══════════════════════════════════════════════════════════
-//   AUTH
-// ═══════════════════════════════════════════════════════════
-function switchAuthMode(mode, btn) {
-  authMode = mode;
-  document.querySelectorAll('.login-tab').forEach(b => b.classList.remove('active'));
+function switchAuthMode(mode,btn){
+  authMode=mode;
+  document.querySelectorAll('.login-tab').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
-  const regFields  = document.getElementById('register-fields');
-  const authBtn    = document.getElementById('auth-btn');
-  const authSwitch = document.getElementById('auth-switch');
-  if (mode === 'register') {
-    regFields.classList.add('show');
-    authBtn.textContent = 'Create Account →';
-    authSwitch.innerHTML = 'Already have an account? <span onclick="switchAuthMode(\'login\', document.querySelectorAll(\'.login-tab\')[0])">Login here</span>';
-  } else {
-    regFields.classList.remove('show');
-    authBtn.textContent = 'Sign In →';
-    authSwitch.innerHTML = 'Don\'t have an account? <span onclick="switchAuthMode(\'register\', document.querySelectorAll(\'.login-tab\')[1])">Register here</span>';
-  }
+  const rf=document.getElementById('register-fields'),ab=document.getElementById('auth-btn'),as=document.getElementById('auth-switch');
+  if(mode==='register'){rf.classList.add('show');ab.textContent='Create Account →';as.innerHTML='Already have an account? <span onclick="switchAuthMode(\'login\',document.querySelectorAll(\'.login-tab\')[0])">Login here</span>';}
+  else{rf.classList.remove('show');ab.textContent='Sign In →';as.innerHTML='Don\'t have an account? <span onclick="switchAuthMode(\'register\',document.querySelectorAll(\'.login-tab\')[1])">Register here</span>';}
 }
 
-async function handleAuth() {
-  const isRegister = document.getElementById('register-fields').classList.contains('show');
-  const email      = document.getElementById('auth-email').value.trim();
-  const password   = document.getElementById('auth-password').value;
-  const regno      = document.getElementById('auth-regno').value.trim();
-
-  const btn = document.getElementById('auth-btn');
-  btn.disabled = true;
-  btn.textContent = isRegister ? 'Creating account...' : 'Signing in...';
-
-  try {
+async function handleAuth(){
+  const isReg=document.getElementById('register-fields').classList.contains('show');
+  const email=document.getElementById('auth-email').value.trim();
+  const password=document.getElementById('auth-password').value;
+  const regno=document.getElementById('auth-regno').value.trim();
+  const btn=document.getElementById('auth-btn');
+  btn.disabled=true;btn.textContent=isReg?'Creating account...':'Signing in...';
+  try{
     let data;
-    if (isRegister) {
-      // FIX: endpoint is just '/register', not '/api/register'
-      data = await api('/register', {
-        method: 'POST',
-        body: JSON.stringify({
-          full_name:   document.getElementById('reg-name').value.trim(),
-          register_no: regno,
-          email:       email,
-          phone:       document.getElementById('reg-phone').value.trim(),
-          password:    password,
-          role:        document.getElementById('reg-role').value
-        })
-      });
-    } else {
-      // FIX: endpoint is just '/login', not '/api/login'
-      data = await api('/login', {
-        method: 'POST',
-        body: JSON.stringify({
-          register_no: regno,
-          password:    password
-        })
-      });
-    }
-
-    // FIX: Save token and user, then trigger login success
-    authToken   = data.token;
-    currentUser = data.user;
-    localStorage.setItem('cc_token', data.token);
-    localStorage.setItem('cc_user',  JSON.stringify(data.user));
-
-    showToast(isRegister ? 'Account created successfully!' : 'Welcome back!');
+    if(isReg){data=await api('/register',{method:'POST',body:JSON.stringify({full_name:document.getElementById('reg-name').value.trim(),register_no:regno,email,phone:document.getElementById('reg-phone').value.trim(),password,role:document.getElementById('reg-role').value})});}
+    else{data=await api('/login',{method:'POST',body:JSON.stringify({register_no:regno,password})});}
+    authToken=data.token;currentUser=data.user;
+    localStorage.setItem('cc_token',data.token);localStorage.setItem('cc_user',JSON.stringify(data.user));
+    showToast(isReg?'Account created successfully!':'Welcome back!');
     onLoginSuccess();
-
-  } catch (err) {
-    showToast(err.message || 'Server connection failed', 'warn');
-  }
-
-  btn.disabled = false;
-  btn.textContent = isRegister ? 'Create Account →' : 'Sign In →';
+  }catch(err){showToast(err.message||'Server connection failed','warn');}
+  btn.disabled=false;btn.textContent=isReg?'Create Account →':'Sign In →';
 }
 
-function onLoginSuccess() {
-  document.getElementById('nav-username').textContent =
-    `${currentUser.full_name} (${currentUser.register_no})`;
+function onLoginSuccess(){
+  document.getElementById('nav-username').textContent=`${currentUser.full_name} (${currentUser.register_no})`;
   document.getElementById('main-nav').classList.add('visible');
+  document.getElementById('landing-wrapper').style.display='none';
+  document.getElementById('page-login').classList.remove('active');
   showPage('report-lost');
 }
 
-function logout() {
-  authToken = null; currentUser = null;
-  localStorage.removeItem('cc_token');
-  localStorage.removeItem('cc_user');
+function logout(){
+  authToken=null;currentUser=null;
+  localStorage.removeItem('cc_token');localStorage.removeItem('cc_user');
   document.getElementById('main-nav').classList.remove('visible');
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.getElementById('page-login').classList.add('active');
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  const lw=document.getElementById('landing-wrapper');
+  lw.style.display='block';lw.classList.remove('hide');lw.scrollTop=0;
 }
 
-// Auto-login if token exists
-window.addEventListener('load', () => {
-  const saved = localStorage.getItem('cc_user');
-  if (authToken && saved) {
-    try {
-      currentUser = JSON.parse(saved);
-      onLoginSuccess();
-    } catch (e) {
-      logout();
-    }
-  }
+window.addEventListener('load',()=>{
+  const saved=localStorage.getItem('cc_user');
+  if(authToken&&saved){try{currentUser=JSON.parse(saved);onLoginSuccess();}catch(e){logout();}}
 });
 
-// ═══════════════════════════════════════════════════════════
-//   NAVIGATION
-// ═══════════════════════════════════════════════════════════
-function showPage(name) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-links button').forEach(b => b.classList.remove('active'));
-  document.getElementById(`page-${name}`).classList.add('active');
-  const btn = document.getElementById(`nav-${name}`);
-  if (btn) btn.classList.add('active');
-  if (name === 'found-items') loadFoundItems();
-  if (name === 'status')      loadStatusBoard();
+function showPage(name){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-links button').forEach(b=>b.classList.remove('active'));
+  const page=document.getElementById(`page-${name}`);
+  if(page){page.classList.add('active');page.scrollTop=0;}
+  const btn=document.getElementById(`nav-${name}`);if(btn)btn.classList.add('active');
+  if(name==='found-items')loadFoundItems();
+  if(name==='status')loadStatusBoard();
 }
 
-// ═══════════════════════════════════════════════════════════
-//   IMAGE PREVIEW
-// ═══════════════════════════════════════════════════════════
-function previewImage(inputId, previewId) {
-  const file = document.getElementById(inputId).files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = e => {
-    document.getElementById(previewId).innerHTML = `<img src="${e.target.result}">`;
-  };
-  reader.readAsDataURL(file);
+function previewImage(inputId,previewId){
+  const file=document.getElementById(inputId).files[0];if(!file)return;
+  const reader=new FileReader();reader.onload=e=>{document.getElementById(previewId).innerHTML=`<img src="${e.target.result}">`;};reader.readAsDataURL(file);
 }
 
-// ═══════════════════════════════════════════════════════════
-//   SUBMIT LOST ITEM
-// ═══════════════════════════════════════════════════════════
-async function submitLostItem() {
-  const item_name   = document.getElementById('lost-item-name').value.trim();
-  const category_id = document.getElementById('lost-category').value;
-  const date_lost   = document.getElementById('lost-date').value;
-  const location    = document.getElementById('lost-location').value.trim();
-  const description = document.getElementById('lost-description').value.trim();
-
-  if (!item_name || !date_lost || !location) {
-    showToast('Please fill item name, date, and location.', 'warn');
-    return;
-  }
-
-  const btn = document.getElementById('lost-submit-btn');
-  btn.disabled = true; btn.textContent = 'Submitting...';
-
-  try {
-    const formData = new FormData();
-    formData.append('item_name',   item_name);
-    formData.append('category_id', category_id);
-    formData.append('date_lost',   date_lost);
-    formData.append('location',    location);
-    formData.append('description', description);
-    const photo = document.getElementById('lost-photo').files[0];
-    if (photo) formData.append('photo', photo);
-
-    const res = await fetch(`${API_BASE}/lost-items`, {
-      method: 'POST',
-      headers: { 'Authorization': `Bearer ${authToken}` },
-      body: formData
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Submission failed');
-
+async function submitLostItem(){
+  const item_name=document.getElementById('lost-item-name').value.trim();
+  const category_id=document.getElementById('lost-category').value;
+  const date_lost=document.getElementById('lost-date').value;
+  const location=document.getElementById('lost-location').value.trim();
+  const description=document.getElementById('lost-description').value.trim();
+  if(!item_name||!date_lost||!location){showToast('Please fill item name, date, and location.','warn');return;}
+  const btn=document.getElementById('lost-submit-btn');btn.disabled=true;btn.textContent='Submitting...';
+  try{
+    const fd=new FormData();fd.append('item_name',item_name);fd.append('category_id',category_id);fd.append('date_lost',date_lost);fd.append('location',location);fd.append('description',description);
+    const photo=document.getElementById('lost-photo').files[0];if(photo)fd.append('photo',photo);
+    const res=await fetch(`${API_BASE}/lost-items`,{method:'POST',headers:{'Authorization':`Bearer ${authToken}`},body:fd});
+    const data=await res.json();if(!res.ok)throw new Error(data.error||'Submission failed');
     showToast('Lost item reported successfully!');
-    ['lost-item-name','lost-location','lost-description'].forEach(id => document.getElementById(id).value = '');
-    document.getElementById('lost-category').value = '';
-    document.getElementById('lost-date').value = '';
-    document.getElementById('lost-preview').innerHTML = '';
-    document.getElementById('lost-photo').value = '';
-  } catch (err) {
-    showToast(err.message, 'warn');
-  }
-
-  btn.disabled = false; btn.textContent = 'Submit Report →';
+    ['lost-item-name','lost-location','lost-description'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('lost-category').value='';document.getElementById('lost-date').value='';
+    document.getElementById('lost-preview').innerHTML='';document.getElementById('lost-photo').value='';
+  }catch(err){showToast(err.message,'warn');}
+  btn.disabled=false;btn.textContent='Submit Report →';
 }
 
-// ═══════════════════════════════════════════════════════════
-//   SUBMIT FOUND ITEM
-// ═══════════════════════════════════════════════════════════
-async function submitFoundItem() {
-  const item_name   = document.getElementById('found-item-name').value.trim();
-  const category_id = document.getElementById('found-category').value;
-  const date_found  = document.getElementById('found-date').value;
-  const location    = document.getElementById('found-location').value.trim();
-  const kept_at     = document.getElementById('found-kept-at').value.trim();
-  const description = document.getElementById('found-description').value.trim();
-
-  if (!item_name || !date_found || !location) {
-    showToast('Please fill item name, date, and location.', 'warn');
-    return;
-  }
-
-  const btn = document.getElementById('found-submit-btn');
-  btn.disabled = true; btn.textContent = 'Submitting...';
-
-  try {
-    const formData = new FormData();
-    formData.append('item_name',   item_name);
-    formData.append('category_id', category_id);
-    formData.append('date_found',  date_found);
-    formData.append('location',    location);
-    formData.append('kept_at',     kept_at);
-    formData.append('description', description);
-    const photo = document.getElementById('found-photo').files[0];
-    if (photo) formData.append('photo', photo);
-
-    const res = await fetch(`${API_BASE}/found-items`, {
-      method: 'POST',
-      headers: { 'Authorization': `Bearer ${authToken}` },
-      body: formData
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Submission failed');
-
+async function submitFoundItem(){
+  const item_name=document.getElementById('found-item-name').value.trim();
+  const category_id=document.getElementById('found-category').value;
+  const date_found=document.getElementById('found-date').value;
+  const location=document.getElementById('found-location').value.trim();
+  const kept_at=document.getElementById('found-kept-at').value.trim();
+  const description=document.getElementById('found-description').value.trim();
+  if(!item_name||!date_found||!location){showToast('Please fill item name, date, and location.','warn');return;}
+  const btn=document.getElementById('found-submit-btn');btn.disabled=true;btn.textContent='Submitting...';
+  try{
+    const fd=new FormData();fd.append('item_name',item_name);fd.append('category_id',category_id);fd.append('date_found',date_found);fd.append('location',location);fd.append('kept_at',kept_at);fd.append('description',description);
+    const photo=document.getElementById('found-photo').files[0];if(photo)fd.append('photo',photo);
+    const res=await fetch(`${API_BASE}/found-items`,{method:'POST',headers:{'Authorization':`Bearer ${authToken}`},body:fd});
+    const data=await res.json();if(!res.ok)throw new Error(data.error||'Submission failed');
     showToast('Found item submitted!');
-    ['found-item-name','found-location','found-kept-at','found-description'].forEach(id => document.getElementById(id).value = '');
-    document.getElementById('found-category').value = '';
-    document.getElementById('found-date').value = '';
-    document.getElementById('found-preview').innerHTML = '';
-    document.getElementById('found-photo').value = '';
+    ['found-item-name','found-location','found-kept-at','found-description'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('found-category').value='';document.getElementById('found-date').value='';
+    document.getElementById('found-preview').innerHTML='';document.getElementById('found-photo').value='';
     loadFoundItems();
-  } catch (err) {
-    showToast(err.message, 'warn');
-  }
-
-  btn.disabled = false; btn.textContent = 'Submit Found Item →';
+  }catch(err){showToast(err.message,'warn');}
+  btn.disabled=false;btn.textContent='Submit Found Item →';
 }
 
-// ═══════════════════════════════════════════════════════════
-//   LOAD & RENDER FOUND ITEMS
-// ═══════════════════════════════════════════════════════════
-async function loadFoundItems() {
-  document.getElementById('found-items-list').innerHTML = '<div class="loading">⏳ Loading found items...</div>';
-  try {
-    allFoundItems = await api('/found-items');
-    renderFoundList('');
-  } catch (err) {
-    document.getElementById('found-items-list').innerHTML =
-      `<div class="empty-state"><div class="empty-icon">⚠️</div><p>${err.message}</p></div>`;
-  }
+async function loadFoundItems(){
+  document.getElementById('found-items-list').innerHTML='<div class="loading">⏳ Loading found items...</div>';
+  try{allFoundItems=await api('/found-items');renderFoundList('');}
+  catch(err){document.getElementById('found-items-list').innerHTML=`<div class="empty-state"><div class="empty-icon">⚠️</div><p>${err.message}</p></div>`;}
 }
 
-function filterFoundCat(cat, btn) {
-  foundCatFilter = cat;
-  document.querySelectorAll('#page-found-items .filter-btn').forEach(b => b.classList.remove('active'));
+function filterFoundCat(cat,btn){
+  foundCatFilter=cat;
+  document.querySelectorAll('#page-found-items .filter-btn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
-  renderFoundList(document.querySelector('#page-found-items .search-bar')?.value || '');
+  renderFoundList(document.querySelector('#page-found-items .search-bar')?.value||'');
 }
 
-function renderFoundList(search = '') {
-  const container = document.getElementById('found-items-list');
-  let items = allFoundItems.filter(i => i.status !== 'Collected');
-  if (foundCatFilter) items = items.filter(i => i.category_name === foundCatFilter);
-  if (search) items = items.filter(i =>
-    i.item_name.toLowerCase().includes(search.toLowerCase()) ||
-    (i.description || '').toLowerCase().includes(search.toLowerCase()) ||
-    i.location.toLowerCase().includes(search.toLowerCase())
-  );
-  if (!items.length) {
-    container.innerHTML = `<div class="empty-state"><div class="empty-icon">🔍</div><p>No found items match your search.</p></div>`;
-    return;
-  }
-  container.innerHTML = items.map(item => `
+function renderFoundList(search=''){
+  const container=document.getElementById('found-items-list');
+  let items=allFoundItems.filter(i=>i.status!=='Collected');
+  if(foundCatFilter)items=items.filter(i=>i.category_name===foundCatFilter);
+  if(search)items=items.filter(i=>i.item_name.toLowerCase().includes(search.toLowerCase())||(i.description||'').toLowerCase().includes(search.toLowerCase())||i.location.toLowerCase().includes(search.toLowerCase()));
+  if(!items.length){container.innerHTML=`<div class="empty-state"><div class="empty-icon">🔍</div><p>No found items match your search.</p></div>`;return;}
+  container.innerHTML=items.map(item=>`
     <div class="item-card">
-      <div class="item-thumb">
-        ${item.photo_path
-          ? `<img src="http://localhost:3000${item.photo_path}" alt="${item.item_name}">`
-          : getCategoryEmoji(item.category_name)}
+      <div class="item-thumb">${item.photo_path?`<img src="http://localhost:3000${item.photo_path}" alt="${item.item_name}">`:getCategoryEmoji(item.category_name)}</div>
+      <div class="item-info"><h3>${item.item_name}</h3><p>${item.description||'No description provided'}</p>
+        <div class="item-meta"><span class="tag location">📍 ${item.location}</span><span class="tag">📅 ${formatDate(item.date_found)}</span>${item.kept_at?`<span class="tag">🏠 ${item.kept_at}</span>`:''}${item.category_name?`<span class="tag">${item.category_name}</span>`:''}</div>
       </div>
-      <div class="item-info">
-        <h3>${item.item_name}</h3>
-        <p>${item.description || 'No description provided'}</p>
-        <div class="item-meta">
-          <span class="tag location">📍 ${item.location}</span>
-          <span class="tag">📅 ${formatDate(item.date_found)}</span>
-          ${item.kept_at ? `<span class="tag">🏠 ${item.kept_at}</span>` : ''}
-          ${item.category_name ? `<span class="tag">${item.category_name}</span>` : ''}
-        </div>
-      </div>
-      <div class="item-contact">
-        <strong>${item.full_name}</strong>
-        <div>${item.register_no}</div>
-        ${item.phone ? `<a class="contact-link" href="tel:${item.phone}">📞 ${item.phone}</a><br>` : ''}
-        <a class="contact-link" href="mailto:${item.email}">✉ ${item.email}</a>
-      </div>
-    </div>
-  `).join('');
+      <div class="item-contact"><strong>${item.full_name}</strong><div>${item.register_no}</div>${item.phone?`<a class="contact-link" href="tel:${item.phone}">📞 ${item.phone}</a><br>`:''}<a class="contact-link" href="mailto:${item.email}">✉ ${item.email}</a></div>
+    </div>`).join('');
 }
 
-// ═══════════════════════════════════════════════════════════
-//   STATUS BOARD
-// ═══════════════════════════════════════════════════════════
-async function loadStatusBoard() {
-  try {
-    const [stats, lostItems, foundItems] = await Promise.all([
-      api('/stats'), api('/lost-items'), api('/found-items')
-    ]);
-    allLostItems  = lostItems;
-    allFoundItems = foundItems;
-
-    document.getElementById('stat-lost').textContent      = stats.total_lost;
-    document.getElementById('stat-found').textContent     = stats.total_found;
-    document.getElementById('stat-unclaimed').textContent = stats.unclaimed;
-    document.getElementById('stat-collected').textContent = stats.collected;
-
-    renderLostTable('');
-    renderFoundTable();
-  } catch (err) {
-    showToast('Error loading status board: ' + err.message, 'warn');
-  }
+async function loadStatusBoard(){
+  try{
+    const [stats,lostItems,foundItems]=await Promise.all([api('/stats'),api('/lost-items'),api('/found-items')]);
+    allLostItems=lostItems;allFoundItems=foundItems;
+    document.getElementById('stat-lost').textContent=stats.total_lost;
+    document.getElementById('stat-found').textContent=stats.total_found;
+    document.getElementById('stat-unclaimed').textContent=stats.unclaimed;
+    document.getElementById('stat-collected').textContent=stats.collected;
+    renderLostTable('');renderFoundTable();
+  }catch(err){showToast('Error loading status board: '+err.message,'warn');}
 }
 
-function renderLostTable(search = '') {
-  let items = allLostItems;
-  if (search) items = items.filter(i =>
-    i.item_name.toLowerCase().includes(search.toLowerCase()) ||
-    i.full_name.toLowerCase().includes(search.toLowerCase())
-  );
-  const tbody = document.getElementById('lost-status-body');
-  if (!items.length) {
-    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:2rem">No lost item reports</td></tr>`;
-    return;
-  }
-  tbody.innerHTML = items.map(item => `
-    <tr>
-      <td>
-        <strong>${item.item_name}</strong>
-        ${item.photo_path ? `<br><img src="http://localhost:3000${item.photo_path}" style="width:36px;height:36px;object-fit:cover;border-radius:6px;margin-top:4px">` : ''}
-      </td>
-      <td>${item.category_name || '—'}</td>
-      <td>${formatDate(item.date_lost)}</td>
-      <td>${item.location}</td>
-      <td>${item.full_name}</td>
+function renderLostTable(search=''){
+  let items=allLostItems;
+  if(search)items=items.filter(i=>i.item_name.toLowerCase().includes(search.toLowerCase())||i.full_name.toLowerCase().includes(search.toLowerCase()));
+  const tbody=document.getElementById('lost-status-body');
+  if(!items.length){tbody.innerHTML=`<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:2rem">No lost item reports</td></tr>`;return;}
+  tbody.innerHTML=items.map(item=>`<tr>
+    <td><strong>${item.item_name}</strong>${item.photo_path?`<br><img src="http://localhost:3000${item.photo_path}" style="width:36px;height:36px;object-fit:cover;border-radius:6px;margin-top:4px">`:''}</td>
+    <td>${item.category_name||'—'}</td><td>${formatDate(item.date_lost)}</td><td>${item.location}</td><td>${item.full_name}</td>
+    <td><code style="background:var(--surface2);padding:2px 6px;border-radius:4px;font-size:0.8rem">${item.register_no}</code></td>
+    <td>${item.phone?`<a href="tel:${item.phone}" style="color:var(--accent);text-decoration:none">📞 ${item.phone}</a><br>`:''}<a href="mailto:${item.email}" style="color:var(--muted);text-decoration:none;font-size:0.8rem">${item.email}</a></td>
+    <td><span class="badge ${item.status==='Found'?'badge-found':'badge-pending'}">${item.status}</span></td>
+  </tr>`).join('');
+}
+
+function canActOnFoundItem(item){
+  if(!currentUser)return false;
+  return currentUser.role==='admin'||currentUser.user_id===item.user_id;
+}
+
+function renderFoundTable(){
+  const tbody=document.getElementById('found-status-body');
+  if(!allFoundItems.length){tbody.innerHTML=`<tr><td colspan="10" style="text-align:center;color:var(--muted);padding:2rem">No found item reports</td></tr>`;return;}
+  tbody.innerHTML=allFoundItems.map(item=>{
+    const canAct=canActOnFoundItem(item);
+    let ac='';
+    if(item.status==='Collected')ac=`<span style="color:var(--muted);font-size:0.8rem">✓ Done</span>`;
+    else if(canAct)ac=`<button class="claim-btn" onclick="markCollected(${item.found_id})">Mark Collected</button>`;
+    else ac=`<span class="action-locked" title="Only the reporter or admin can update this">🔒 Restricted</span>`;
+    return `<tr>
+      <td><strong>${item.item_name}</strong>${item.photo_path?`<br><img src="http://localhost:3000${item.photo_path}" style="width:36px;height:36px;object-fit:cover;border-radius:6px;margin-top:4px">`:''}</td>
+      <td>${item.category_name||'—'}</td><td>${formatDate(item.date_found)}</td><td>${item.location}</td><td>${item.kept_at||'—'}</td>
+      <td>${item.full_name}${item.user_id===currentUser?.user_id?`<span style="font-size:0.7rem;color:var(--accent);margin-left:4px">(you)</span>`:''}</td>
       <td><code style="background:var(--surface2);padding:2px 6px;border-radius:4px;font-size:0.8rem">${item.register_no}</code></td>
-      <td>
-        ${item.phone ? `<a href="tel:${item.phone}" style="color:var(--accent);text-decoration:none">📞 ${item.phone}</a><br>` : ''}
-        <a href="mailto:${item.email}" style="color:var(--muted);text-decoration:none;font-size:0.8rem">${item.email}</a>
-      </td>
-      <td><span class="badge ${item.status === 'Found' ? 'badge-found' : 'badge-pending'}">${item.status}</span></td>
-    </tr>
-  `).join('');
+      <td>${item.phone?`<a href="tel:${item.phone}" style="color:var(--accent);text-decoration:none">📞 ${item.phone}</a><br>`:''}<a href="mailto:${item.email}" style="color:var(--muted);text-decoration:none;font-size:0.8rem">${item.email}</a></td>
+      <td><span class="badge ${item.status==='Collected'?'badge-collected':item.status==='Claimed'?'badge-found':'badge-new'}">${item.status}</span></td>
+      <td>${ac}</td>
+    </tr>`;
+  }).join('');
 }
 
-function renderFoundTable() {
-  const tbody = document.getElementById('found-status-body');
-  if (!allFoundItems.length) {
-    tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;color:var(--muted);padding:2rem">No found item reports</td></tr>`;
-    return;
-  }
-  tbody.innerHTML = allFoundItems.map(item => `
-    <tr>
-      <td>
-        <strong>${item.item_name}</strong>
-        ${item.photo_path ? `<br><img src="http://localhost:3000${item.photo_path}" style="width:36px;height:36px;object-fit:cover;border-radius:6px;margin-top:4px">` : ''}
-      </td>
-      <td>${item.category_name || '—'}</td>
-      <td>${formatDate(item.date_found)}</td>
-      <td>${item.location}</td>
-      <td>${item.kept_at || '—'}</td>
-      <td>${item.full_name}</td>
-      <td><code style="background:var(--surface2);padding:2px 6px;border-radius:4px;font-size:0.8rem">${item.register_no}</code></td>
-      <td>
-        ${item.phone ? `<a href="tel:${item.phone}" style="color:var(--accent);text-decoration:none">📞 ${item.phone}</a><br>` : ''}
-        <a href="mailto:${item.email}" style="color:var(--muted);text-decoration:none;font-size:0.8rem">${item.email}</a>
-      </td>
-      <td><span class="badge ${item.status === 'Collected' ? 'badge-collected' : item.status === 'Claimed' ? 'badge-found' : 'badge-new'}">${item.status}</span></td>
-      <td>
-        ${item.status !== 'Collected'
-          ? `<button class="claim-btn" onclick="markCollected(${item.found_id})">Mark Collected</button>`
-          : `<span style="color:var(--muted);font-size:0.8rem">✓ Done</span>`}
-      </td>
-    </tr>
-  `).join('');
+async function markCollected(found_id){
+  try{
+    const res=await fetch(`${API_BASE}/found-items/${found_id}/collect`,{method:'PATCH',headers:{'Authorization':`Bearer ${authToken}`}});
+    const data=await res.json();
+    if(!res.ok){showToast(res.status===403?'Only the reporter or an admin can mark this as collected.':(data.error||'Failed to update'),'warn');return;}
+    showToast('Item marked as collected!');loadStatusBoard();
+  }catch(err){showToast('Error: '+err.message,'warn');}
 }
 
-async function markCollected(found_id) {
-  try {
-    const res = await fetch(`${API_BASE}/found-items/${found_id}/collect`, {
-      method: 'PATCH',
-      headers: { 'Authorization': `Bearer ${authToken}` }
-    });
-    if (!res.ok) {
-      const data = await res.json();
-      throw new Error(data.error || 'Failed to update');
-    }
-    showToast('Item marked as collected!');
-    loadStatusBoard();
-  } catch (err) {
-    showToast('Error: ' + err.message, 'warn');
-  }
-}
-
-// ═══════════════════════════════════════════════════════════
-//   HELPERS
-// ═══════════════════════════════════════════════════════════
-function getCategoryEmoji(cat) {
-  const map = {
-    Electronics: '📱', Stationery: '✏️', Clothing: '👕',
-    Accessories: '⌚', 'Documents / ID': '🪪', Keys: '🔑',
-    Bags: '🎒', 'Water Bottle': '🍶', Other: '📦'
-  };
-  return map[cat] || '📦';
-}
-
-function formatDate(d) {
-  if (!d) return '—';
-  return new Date(d).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
-}
-
-function showToast(msg, type = 'success') {
-  const t = document.getElementById('toast');
-  t.textContent = (type === 'warn' ? '⚠️ ' : '✅ ') + msg;
-  t.style.borderLeftColor = type === 'warn' ? 'var(--warning)' : 'var(--success)';
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 3500);
+function getCategoryEmoji(cat){return({Electronics:'📱',Stationery:'✏️',Clothing:'👕',Accessories:'⌚','Documents / ID':'🪪',Keys:'🔑',Bags:'🎒','Water Bottle':'🍶',Other:'📦'})[cat]||'📦';}
+function formatDate(d){if(!d)return'—';return new Date(d).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});}
+function showToast(msg,type='success'){
+  const t=document.getElementById('toast');
+  t.textContent=(type==='warn'?'⚠️ ':'✅ ')+msg;
+  t.style.borderLeftColor=type==='warn'?'var(--warning)':'var(--success)';
+  t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3500);
 }
 </script>
 </body>

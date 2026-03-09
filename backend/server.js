@@ -20,10 +20,7 @@ const JWT_SECRET = 'campus_compass_secret_key'; // Change in production!
 app.use(cors());
 app.use(express.json());
 // ─── SERVE FRONTEND FILES ─────────────────────────────────────
-// This tells Express to serve your CSS, JS, and Images from the frontend folder
 app.use(express.static(path.join(__dirname, '../frontend')));
-
-// This handles the main URL (http://localhost:3000) and sends your HTML file
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, '../frontend', 'index.html'));
 });
@@ -101,9 +98,14 @@ app.post('/api/login', async (req, res) => {
     );
     res.json({
       token,
-      user: { user_id: user.user_id, full_name: user.full_name,
-              register_no: user.register_no, email: user.email,
-              phone: user.phone, role: user.role }
+      user: {
+        user_id:     user.user_id,
+        full_name:   user.full_name,
+        register_no: user.register_no,
+        email:       user.email,
+        phone:       user.phone,
+        role:        user.role        // ← included so frontend can check admin role
+      }
     });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -149,11 +151,27 @@ app.post('/api/lost-items', authMiddleware, upload.single('photo'), async (req, 
   }
 });
 
-// PATCH /api/lost-items/:id/status  — update status
+// PATCH /api/lost-items/:id/status  — update lost item status
+// Only the original reporter or an admin can change the status
 app.patch('/api/lost-items/:id/status', authMiddleware, async (req, res) => {
   const { status } = req.body;
   try {
-    await db.execute('UPDATE lost_items SET status = ? WHERE lost_id = ?', [status, req.params.id]);
+    // Fetch the item to verify ownership
+    const [rows] = await db.execute(
+      'SELECT user_id FROM lost_items WHERE lost_id = ?', [req.params.id]
+    );
+    if (!rows.length)
+      return res.status(404).json({ error: 'Lost item not found' });
+
+    const isOwner = rows[0].user_id === req.user.user_id;
+    const isAdmin = req.user.role === 'admin';
+
+    if (!isOwner && !isAdmin)
+      return res.status(403).json({ error: 'Permission denied. Only the reporter or an admin can update this status.' });
+
+    await db.execute(
+      'UPDATE lost_items SET status = ? WHERE lost_id = ?', [status, req.params.id]
+    );
     res.json({ message: 'Status updated' });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -165,10 +183,14 @@ app.patch('/api/lost-items/:id/status', authMiddleware, async (req, res) => {
 // ═══════════════════════════════════════════════════════════════
 
 // GET /api/found-items  — list all found items with finder info
+// NOTE: user_id is included so the frontend can check ownership
 app.get('/api/found-items', async (req, res) => {
   try {
     const [rows] = await db.execute(`
-      SELECT f.*, c.category_name,
+      SELECT f.found_id, f.user_id, f.category_id, f.item_name,
+             f.description, f.date_found, f.location, f.kept_at,
+             f.status, f.photo_path, f.reported_at,
+             c.category_name,
              u.full_name, u.register_no, u.phone, u.email
       FROM found_items f
       JOIN users u ON f.user_id = u.user_id
@@ -200,14 +222,32 @@ app.post('/api/found-items', authMiddleware, upload.single('photo'), async (req,
 });
 
 // PATCH /api/found-items/:id/collect  — mark as collected
+// Only the person who reported the found item OR an admin can do this
 app.patch('/api/found-items/:id/collect', authMiddleware, async (req, res) => {
   try {
+    // Step 1: Fetch item to check who reported it
+    const [rows] = await db.execute(
+      'SELECT user_id FROM found_items WHERE found_id = ?', [req.params.id]
+    );
+
+    if (!rows.length)
+      return res.status(404).json({ error: 'Found item not found' });
+
+    const isOwner = rows[0].user_id === req.user.user_id;
+    const isAdmin = req.user.role === 'admin';
+
+    // Step 2: Block if neither owner nor admin
+    if (!isOwner && !isAdmin)
+      return res.status(403).json({ error: 'Permission denied. Only the reporter or an admin can mark this as collected.' });
+
+    // Step 3: Perform the update
     await db.execute(
       'UPDATE found_items SET status = "Collected" WHERE found_id = ?', [req.params.id]
     );
     await db.execute(
       'UPDATE claims SET status = "Collected", collected_at = NOW() WHERE found_id = ?', [req.params.id]
     );
+
     res.json({ message: 'Item marked as collected' });
   } catch (err) {
     res.status(500).json({ error: err.message });
