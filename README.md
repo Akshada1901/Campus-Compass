@@ -82,4 +82,5 @@ node server.js
 
 ---
 
-Built by [@Akshada1901](https://github.com/Akshada1901) · SRM University
+Built by [@Akshada1901](https://github.com/Akshada1901)
+
