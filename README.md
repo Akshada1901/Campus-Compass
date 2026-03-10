@@ -82,5 +82,4 @@ node server.js
 
 ---
 
-Built by [@Akshada1901](https://github.com/Akshada1901)
 
